@@ -1,0 +1,90 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  SSH_PUB_KEY:
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzKKT5xCssZ38UI5VWaPOqW3ldVsg/0tDceTrCFnsd3 github.action@antoinebellanger.fr
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Nix cache
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-23.05
+
+      - name: Compiles
+        run: nix-shell --run "make unit_tests"
+
+      - name: Run unit_tests
+        run: nix-shell --run "./unit_tests --verbose --full-stats --color=always -j8"
+
+  coding_style:
+    needs: [ unit_tests ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Nix cache
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-23.05
+
+      - name: Install SSH keys
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: $SSH_PUB_KEY
+
+      - name: Run coding style checker
+        run: nix run github:Sigmapitech/cs
+
+  banned_function_checker:
+    needs: [ unit_tests ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Nix cache
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-23.05
+
+      - name: Compiles
+        run: nix-shell --run "make"
+
+      - name: Check for banned functions
+        run: nix run github:dawoox/efc mysh
+
+  mirror:
+    needs: [ coding_style, banned_function_checker ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: $SSH_PUB_KEY
+
+      - name: Push to epitech
+        run: |
+          git fetch --unshallow origin
+          git remote add epitech "${{ secrets.MIRROR_REPO }}"
+          git push epitech --force
