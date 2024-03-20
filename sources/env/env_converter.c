@@ -5,11 +5,9 @@
 ** env_converter header
 */
 
-#include <malloc.h>
-
-#include "../../include/env_converter.h"
-#include "../../include/my.h"
-#include "../../include/my_printf.h"
+#include "minishell.h"
+#include "my.h"
+#include "my_printf.h"
 
 static
 char *format_env_var(env_var_t *env_var)
@@ -35,7 +33,7 @@ char *format_env_var(env_var_t *env_var)
 char **get_env_array(shell_t *shell)
 {
     char **env = malloc(sizeof(char *) * (shell->nb_env_var + 1));
-    env_var_t *curr = shell->env_var;
+    env_var_t *curr = shell->env_vars;
 
     if (env == NULL)
         return NULL;

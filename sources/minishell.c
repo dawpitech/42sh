@@ -6,13 +6,9 @@
 */
 
 #include <unistd.h>
-#include <stdio.h>
 
-#include "../include/minishell.h"
-#include "../include/env_manager.h"
-#include "../include/my_parser.h"
-#include "../include/prompt.h"
-#include "../include/runner.h"
+#include "minishell.h"
+#include "lexer.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -33,17 +29,7 @@ void exiting_hook(shell_t *shell)
     free(shell->current_path);
     if (shell->last_path != NULL)
         free(shell->last_path);
-    free_env_var(shell);
-}
-
-static
-void clean_prompt(shell_t *shell)
-{
-    for (int i = 0; shell->prompt->argv[i] != NULL; i += 1)
-        free(shell->prompt->argv[i]);
-    free(shell->prompt->argv);
-    free(shell->prompt->raw_input);
-    free(shell->prompt);
+    free_env_vars(shell);
 }
 
 int minishell(__attribute__((unused)) int argc,
@@ -58,9 +44,9 @@ int minishell(__attribute__((unused)) int argc,
             break;
         if (parse_input(&shell) == RET_ERROR)
             break;
-        shell.last_exit_code = run_command(&shell);
-        clean_prompt(&shell);
+        for (int i = 0; shell.prompt->commands[i].argv != NULL; i += 1)
+            run_command(&shell, &shell.prompt->commands[i]);
     }
     exiting_hook(&shell);
-    return shell.last_exit_code;
+    return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;
 }

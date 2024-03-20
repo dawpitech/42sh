@@ -11,14 +11,12 @@
     #define RET_VALID 0
     #define EXIT_FAILURE_TECH 84
     #define EXIT_SUCCESS_TECH 0
-    #define SIGN_ERROR_CODE_OFFSET 128
+    #define NO_CMD_FOUND (-42)
     #include <stdbool.h>
     #include <stdlib.h>
     #ifndef WCOREDUMP
-        #define WCOREDUMP 0
+        #define WCOREDUMP(x) 0
     #endif
-
-    #include "hashtable.h"
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);
 typedef struct env_var_s {
@@ -27,13 +25,18 @@ typedef struct env_var_s {
     struct env_var_s *next;
 } env_var_t;
 typedef struct {
-    char *raw_input;
     char **argv;
     int argc;
+    int fd_stdin;
+    int fd_stdout;
+} sh_command_t;
+typedef struct {
+    sh_command_t *commands;
+    char *raw_input;
 } prompt_t;
 typedef struct {
     prompt_t *prompt;
-    env_var_t *env_var;
+    env_var_t *env_vars;
     int nb_env_var;
     bool running;
     bool isatty;
@@ -41,4 +44,14 @@ typedef struct {
     char *last_path;
     int last_exit_code;
 } shell_t;
+int present_prompt(shell_t *shell);
+int parse_input(shell_t *shell);
+int run_command(shell_t *shell, sh_command_t *cmd);
+char **get_env_array(shell_t *shell);
+void free_env_array(char **array);
+env_var_t *get_env_var(shell_t *context, char *key);
+int add_env_var(shell_t *context, char *key, char *value);
+int parse_env_var(shell_t *context, char **env);
+void free_env_vars(shell_t *context);
+int remove_env_var(shell_t *context, char *key);
 #endif //MINISHELL_MINISHELL_H

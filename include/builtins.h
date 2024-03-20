@@ -7,7 +7,6 @@
 
 #ifndef MINISHELL_BUILTINS_H
     #define MINISHELL_BUILTINS_H
-    #define NO_CMD_FOUND 42
     #include <stddef.h>
 
     #include "builtins_cmd.h"

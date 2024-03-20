@@ -8,10 +8,20 @@
 #include <malloc.h>
 #include <stddef.h>
 
-#include "../../include/prompt.h"
-#include "../../include/my.h"
-#include "../../include/my_parser.h"
+#include "minishell.h"
+#include "my.h"
 #include "my_printf.h"
+
+static
+void print_prompt(shell_t *shell)
+{
+    char *color = shell->last_exit_code != 0 ? "\\033[91m" : "\\033[92m";
+    char static *color_reset = "\\033[39m";
+    if (!shell->isatty)
+        return;
+    if (shell->last_exit_code != 0)
+    my_printf("%s%d%s>%c $ ", color, color_reset, shell->last_exit_code);
+}
 
 static
 char *get_from_stdin(void)
@@ -34,8 +44,7 @@ int present_prompt(shell_t *shell)
     shell->prompt = malloc(sizeof(prompt_t));
     if (shell->prompt == NULL)
         return RET_ERROR;
-    if (shell->isatty)
-        my_printf("%d> $ ", shell->last_exit_code);
+    print_prompt(shell);
     shell->prompt->raw_input = get_from_stdin();
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;

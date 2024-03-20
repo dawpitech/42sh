@@ -7,14 +7,12 @@
 
 #include <errno.h>
 #include <stddef.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "builtins_cmd.h"
-#include "env_manager.h"
 #include "my.h"
 #include "my_printf.h"
-#include "my_put_stderr.h"
+#include "utils.h"
 
 static
 char *compute_cd_path(shell_t *shell, int argc, char **argv)
@@ -104,7 +102,7 @@ int execute_setenv(shell_t *shell, int argc, char **argv)
 int execute_env(shell_t *shell, __attribute__((unused)) int argc,
     __attribute__((unused)) char **argv)
 {
-    env_var_t *curr = shell->env_var;
+    env_var_t *curr = shell->env_vars;
 
     while (curr != NULL) {
         if (curr->value != NULL) {

@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "../../include/env_manager.h"
-#include "../../include/my.h"
+#include "minishell.h"
+#include "my.h"
 
 static
 void mov_ptr_to_delete(env_var_t *prev, env_var_t *curr, shell_t *context)
@@ -17,12 +17,12 @@ void mov_ptr_to_delete(env_var_t *prev, env_var_t *curr, shell_t *context)
     if (prev != NULL)
         prev->next = curr->next;
     else
-        context->env_var = curr->next;
+        context->env_vars = curr->next;
 }
 
 env_var_t *get_env_var(shell_t *context, char *key)
 {
-    env_var_t *curr = context->env_var;
+    env_var_t *curr = context->env_vars;
 
     while (curr != NULL) {
         if (my_strcmp(curr->key, key) == 0)
@@ -34,7 +34,7 @@ env_var_t *get_env_var(shell_t *context, char *key)
 
 int add_env_var(shell_t *context, char *key, char *value)
 {
-    env_var_t **last = &context->env_var;
+    env_var_t **last = &context->env_vars;
     env_var_t *new = malloc(sizeof(env_var_t));
 
     if (new == NULL)
@@ -56,7 +56,7 @@ int add_env_var(shell_t *context, char *key, char *value)
 int remove_env_var(shell_t *context, char *key)
 {
     env_var_t *prev = NULL;
-    env_var_t *curr = context->env_var;
+    env_var_t *curr = context->env_vars;
     bool is_remove = false;
 
     while (curr != NULL) {
@@ -91,9 +91,9 @@ int parse_env_var(shell_t *context, char **env)
     return EXIT_SUCCESS_TECH;
 }
 
-void free_env_var(shell_t *context)
+void free_env_vars(shell_t *context)
 {
-    env_var_t *curr = context->env_var;
+    env_var_t *curr = context->env_vars;
     env_var_t *prev = NULL;
 
     while (curr != NULL) {

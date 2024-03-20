@@ -5,13 +5,13 @@
 ** my_parser header
 */
 
-#include <string.h>
+#include <stdio.h>
 
-#include "my_parser.h"
 #include "builtins.h"
-#include "mem_toolbox.h"
 #include "my.h"
+#include "lexer.h"
 
+/*
 static
 char **parse_args(char *input)
 {
@@ -43,11 +43,20 @@ int init_parser(shell_t *shell, char *input)
     for (argc = 0; shell->prompt->argv[argc] != NULL; argc += 1);
     shell->prompt->argc = argc;
     return RET_VALID;
-}
+}*/
 
 int parse_input(shell_t *shell)
 {
-    if (init_parser(shell, shell->prompt->raw_input) == RET_ERROR)
-        return RET_ERROR;
+    char *const input = "echo \"bob\"; echo alice";
+    lexer_t lexer = lexer_new(input, my_strlen(input));
+
+    printf("Input: %s\n\n", input);
+    token_t token = lexer_next(&lexer);
+    while (token.kind != TOKEN_END) {
+        printf("%.*s (%s)\n", (int) token.text_len, token.text, get_token_kind_as_str(token.kind));
+        if (token.kind != TOKEN_INVALID)
+            return RET_ERROR;
+        token = lexer_next(&lexer);
+    }
     return RET_VALID;
 }

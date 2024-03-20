@@ -22,7 +22,7 @@ T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
 T_CFLAGS	+=	--coverage
 
-LIBS_FLAGS	=	-L./lib/ -lmy -lhashtable
+LIBS_FLAGS	=	-L./lib/ -lmy
 
 BDIR	=	.build
 T_BDIR	=	.buildTests
@@ -33,15 +33,13 @@ SEGFAULT_NAME	=	segfault.bin
 FP_EXECP_NAME	=	floating.bin
 
 SRC = ./sources/minishell.c
+SRC	+=	./sources/builtins_cmd.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
 SRC	+=	./sources/parser/my_parser.c
-SRC	+=	./sources/builtins/builtins_cmd.c
-SRC	+=	./sources/builtins/builtins_runner.c
 SRC	+=	./sources/IO/prompt.c
 SRC	+=	./sources/utils/mem_toolbox.c
 SRC	+=	./sources/utils/my_put_stderr.c
-SRC	+=	./sources/launcher/launcher.c
 SRC	+=	./sources/launcher/path_explorer.c
 SRC	+=	./sources/runner/runner.c
 SRC	+=	./sources/parser/lexer.c
@@ -88,7 +86,6 @@ tests_run_pp:	$(T_NAME)
 
 build_lib:
 	@ make -C ./lib/my/
-	@ make -C ./lib/hashtable/
 
 clean:
 	@ rm -f $(T_OBJ)
@@ -103,7 +100,6 @@ fclean:	clean
 	@ rm -f $(SEGFAULT_NAME)
 	@ rm -f $(FP_EXECP_NAME)
 	@ make -C ./lib/my/ fclean
-	@ make -C ./lib/hashtable/ fclean
 
 re:	fclean all
 
