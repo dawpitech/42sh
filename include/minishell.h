@@ -32,6 +32,7 @@ typedef struct {
 } sh_command_t;
 typedef struct {
     sh_command_t *commands;
+    int nb_commands;
     char *raw_input;
 } prompt_t;
 typedef struct {

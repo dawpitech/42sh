@@ -15,12 +15,11 @@
 static
 void print_prompt(shell_t *shell)
 {
-    char *color = shell->last_exit_code != 0 ? "\\033[91m" : "\\033[92m";
-    char static *color_reset = "\\033[39m";
+    char *color = shell->last_exit_code != 0 ? "\033[91m" : "\033[92m";
     if (!shell->isatty)
         return;
-    if (shell->last_exit_code != 0)
-    my_printf("%s%d%s>%c $ ", color, color_reset, shell->last_exit_code);
+    my_putstr(color);
+    my_printf("%d\033[39m> ", shell->last_exit_code);
 }
 
 static
@@ -42,6 +41,8 @@ char *get_from_stdin(void)
 int present_prompt(shell_t *shell)
 {
     shell->prompt = malloc(sizeof(prompt_t));
+    shell->prompt->commands = malloc(sizeof(sh_command_t));
+    shell->prompt->nb_commands = 0;
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);
