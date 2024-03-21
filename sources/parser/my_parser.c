@@ -48,7 +48,6 @@ int parse_input(shell_t *shell)
 {
     char *const input = shell->prompt->raw_input;
     lexer_t lexer = lexer_new(input, my_strlen(input));
-    prompt_t *prompt = shell->prompt;
     bool is_in_command = false;
     token_t token = lexer_next(&lexer);
 
@@ -56,7 +55,7 @@ int parse_input(shell_t *shell)
         if (token.kind == TOKEN_INVALID)
             return RET_ERROR;
         if (token.kind == TOKEN_SYMBOL) {
-            handle_symbol(prompt, token, &is_in_command);
+            handle_symbol(shell->prompt, token, &is_in_command);
         } else {
             is_in_command = false;
         }
