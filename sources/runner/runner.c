@@ -66,7 +66,7 @@ int resolve_path(shell_t *shell, sh_command_t *cmd)
     if (bin_location == NULL)
         return NO_CMD_FOUND;
     full_path = malloc(sizeof(char) * (my_strlen(bin_location)
-                                       + my_strlen(cmd->argv[0]) + 2));
+        + my_strlen(cmd->argv[0]) + 2));
     if (full_path == NULL)
         exit(EXIT_FAILURE_TECH);
     my_strcpy(full_path, bin_location);

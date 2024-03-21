@@ -16,6 +16,7 @@ static
 void print_prompt(shell_t *shell)
 {
     char *color = shell->last_exit_code != 0 ? "\033[91m" : "\033[92m";
+
     if (!shell->isatty)
         return;
     my_putstr(color);

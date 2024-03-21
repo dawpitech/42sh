@@ -8,9 +8,6 @@
 #ifndef MINISHELL2_LEXER_H
     #define MINISHELL2_LEXER_H
     #include <stddef.h>
-
-#define IS_SPACE_CHARS_LEN (sizeof(ISSPACE_CHARS) / sizeof(char))
-
 typedef enum {
     TOKEN_END = 0,
     TOKEN_SYMBOL,

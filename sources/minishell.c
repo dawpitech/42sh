@@ -44,7 +44,6 @@ int minishell(__attribute__((unused)) int argc,
             break;
         if (parse_input(&shell) == RET_ERROR)
             break;
-        //exit(69);
         for (int i = 0; i < shell.prompt->nb_commands; i += 1)
             run_command(&shell, &shell.prompt->commands[i]);
     }
