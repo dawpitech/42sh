@@ -45,7 +45,8 @@ int minishell(__attribute__((unused)) int argc,
         if (parse_input(&shell) == RET_ERROR)
             break;
         for (int i = 0; i < shell.prompt->nb_commands; i += 1)
-            run_command(&shell, &shell.prompt->commands[i]);
+            shell.last_exit_code = run_command(&shell,
+                &shell.prompt->commands[i]);
     }
     exiting_hook(&shell);
     return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;
