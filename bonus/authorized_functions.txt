@@ -30,6 +30,10 @@ getpid
 strerror
 perror
 strsignal
+# Specific to Minishell2
+pipe
+dup
+dup2
 # List of things that are optimized but shouldn't be used
 memset
 stdin
