@@ -68,10 +68,10 @@ int parse_input(shell_t *shell)
     prompt_t *prompt = shell->prompt;
     bool is_in_command = false;
 
-    printf("Input: %s\n\n", input);
+    //printf("Input: %s\n\n", input);
     token_t token = lexer_next(&lexer);
     while (token.kind != TOKEN_END) {
-        printf("%.*s (%s)\n", (int) token.text_len, token.text, get_token_kind_as_str(token.kind));
+        //printf("%.*s (%s)\n", (int) token.text_len, token.text, get_token_kind_as_str(token.kind));
         if (token.kind == TOKEN_INVALID)
             return RET_ERROR;
 
@@ -96,11 +96,13 @@ int parse_input(shell_t *shell)
         }
         token = lexer_next(&lexer);
     }
+    /*
     for (int i = 0; prompt->commands[i].argv != NULL; i += 1) {
         printf("Command %d\n", i);
         for (int j = 0; prompt->commands[i].argv[j] != NULL; j += 1) {
             printf("Arg %d: %s\n", j, prompt->commands[i].argv[j]);
         }
     }
+     */
     return RET_VALID;
 }
