@@ -54,7 +54,7 @@ void add_arg_to_cmd(sh_command_t *cmd, char const *arg, size_t arg_len)
     cmd->argv = my_realloc(cmd->argv, sizeof(char *) * (cmd->argc + 2),
         sizeof(char *) * (cmd->argc + 1));
     my_strncpy(arg_cpy, arg, (int) arg_len);
-    my_strcat(arg_cpy, "\0");
+    arg_cpy[arg_len] = '\0';
     cmd->argv[cmd->argc] = arg_cpy;
     cmd->argv[cmd->argc + 1] = NULL;
     cmd->argc += 1;
