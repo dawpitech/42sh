@@ -40,7 +40,7 @@ int compute_return_code(int child_status)
 }
 
 static
-void handle_redirect(shell_t *shell, sh_command_t *cmd)
+void handle_redirect(sh_command_t *cmd)
 {
     int fd;
     int oflag = O_WRONLY | O_CREAT | O_TRUNC;
@@ -64,7 +64,7 @@ void child_process(shell_t *shell, sh_command_t *cmd)
     char **env = get_env_array(shell);
 
     if (cmd->type == REDR || cmd->type == REDL)
-        handle_redirect(shell, cmd);
+        handle_redirect(cmd);
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
     exit(1);

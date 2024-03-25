@@ -41,7 +41,7 @@ void initialize_cmd(sh_command_t *cmd)
 }
 
 static
-int handle_redirect_file_name(prompt_t *p, token_t *t, lexer_t *l)
+int handle_redirect_file_name(prompt_t *p, token_t *t)
 {
     char *file_name = malloc(sizeof(char) * (t->text_len + 1));
 
@@ -60,7 +60,7 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
 {
     if (prompt->nb_commands != 0 && prompt->commands[prompt->nb_commands - 1]
         .type == REDR)
-        return handle_redirect_file_name(prompt, token, l);
+        return handle_redirect_file_name(prompt, token);
     if (!l->is_in_command) {
         prompt->nb_commands += 1;
         prompt->commands = my_realloc(prompt->commands, sizeof(sh_command_t) *
