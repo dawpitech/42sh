@@ -45,9 +45,11 @@ void handle_redirect(shell_t *shell, sh_command_t *cmd)
     int fd;
 
     if (cmd->type == REDR) {
+        if (cmd->stdout_file == NULL)
+            my_put_stderr("Missing name for redirect.\n");
         fd = open(cmd->stdout_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (fd == -1)
-            exit(EXIT_FAILURE_TECH);
+            exit(1);
         dup2(fd, STDOUT_FILENO);
         close(fd);
     }
