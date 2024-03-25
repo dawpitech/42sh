@@ -64,7 +64,7 @@ void child_process(shell_t *shell, sh_command_t *cmd)
         handle_redirect(shell, cmd);
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
-    exit(EXIT_FAILURE_TECH);
+    exit(1);
 }
 
 static
@@ -107,12 +107,12 @@ int run_command(shell_t *shell, sh_command_t *cmd)
     return_value = search_and_run_builtins(shell, cmd);
     if (return_value != NO_CMD_FOUND)
         return return_value;
-    if (!my_strstr(cmd->argv[0], "/"))
-        resolve_path(shell, cmd);
-    return_value = launch_bin(shell, cmd);
-    if (return_value == NO_CMD_FOUND) {
-        my_put_stderr(cmd->argv[0]);
-        my_put_stderr(": Command not found.\n");
+    if (!my_strstr(cmd->argv[0], "/") && resolve_path(shell, cmd)
+        == NO_CMD_FOUND) {
+            my_put_stderr(cmd->argv[0]);
+            my_put_stderr(": Command not found.\n");
+            return 1;
     }
+    return_value = launch_bin(shell, cmd);
     return return_value;
 }
