@@ -11,15 +11,6 @@
 #include "lexer.h"
 #include "my.h"
 
-const token_representation_t token_repr[] = {
-    {.text = "|", .kind = TOKEN_PIPE},
-    {.text = ";", .kind = TOKEN_SEMICOLON},
-    {.text = ">", .kind = TOKEN_REDIRECT_R},
-    {.text = "<", .kind = TOKEN_REDIRECT_L},
-    {.text = ">>", .kind = TOKEN_REDIRECT_DOUBLE_R},
-    {.text = "<<", .kind = TOKEN_REDIRECT_DOUBLE_L},
-};
-
 static
 bool my_isspace(char chr)
 {
@@ -102,6 +93,21 @@ token_t handle_symbols(lexer_t *l, token_t *token)
     return *token;
 }
 
+static
+void search_literals(lexer_t *l, token_t *token)
+{
+    if (my_strncmp(">", &(l->content[l->cursor]), 1) == 0)
+        token->kind = TOKEN_REDIRECT_R;
+    if (my_strncmp(">>", &(l->content[l->cursor]), 2) == 0)
+        token->kind = TOKEN_REDIRECT_RR;
+    if (my_strncmp("<", &(l->content[l->cursor]), 1) == 0)
+        token->kind = TOKEN_REDIRECT_L;
+    if (my_strncmp("<<", &(l->content[l->cursor]), 2) == 0)
+        token->kind = TOKEN_REDIRECT_LL;
+    if (my_strncmp("|", &(l->content[l->cursor]), 1) == 0)
+        token->kind = TOKEN_PIPE;
+}
+
 token_t lexer_next(lexer_t *l)
 {
     token_t token = {0};
@@ -116,11 +122,9 @@ token_t lexer_next(lexer_t *l)
         return handle_semicolon(l, &token);
     if (!is_special_char(l->content[l->cursor]))
         return handle_symbols(l, &token);
-    if (l->content[l->cursor] == '>') {
-        token.kind = TOKEN_REDIRECT_R;
-    } else {
+    search_literals(l, &token);
+    if (token.kind == TOKEN_END)
         token.kind = TOKEN_INVALID;
-    }
     token.text_len = 1;
     l->cursor += 1;
     return token;

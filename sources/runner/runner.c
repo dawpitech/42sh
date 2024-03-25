@@ -43,11 +43,14 @@ static
 void handle_redirect(shell_t *shell, sh_command_t *cmd)
 {
     int fd;
+    int oflag = O_WRONLY | O_CREAT | O_TRUNC;
 
-    if (cmd->type == REDR) {
+    if (cmd->type == REDR)
+        oflag = O_WRONLY | O_CREAT | O_APPEND;
+    if (cmd->type == REDR || cmd->type == DBL_REDR) {
         if (cmd->stdout_file == NULL)
             my_put_stderr("Missing name for redirect.\n");
-        fd = open(cmd->stdout_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        fd = open(cmd->stdout_file, oflag, 0644);
         if (fd == -1)
             exit(1);
         dup2(fd, STDOUT_FILENO);

@@ -79,13 +79,16 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
 }
 
 static
-int handle_redirect(prompt_t *prompt)
+int handle_redirect_right(prompt_t *prompt, token_t *token)
 {
     if (prompt->nb_commands == 0) {
         my_put_stderr("Invalid null command.\n");
         return RET_ERROR;
     }
-    prompt->commands[prompt->nb_commands - 1].type = REDR;
+    if (token->kind == TOKEN_REDIRECT_R)
+        prompt->commands[prompt->nb_commands - 1].type = REDR;
+    if (token->kind == TOKEN_REDIRECT_RR)
+        prompt->commands[prompt->nb_commands - 1].type = DBL_REDR;
     return RET_VALID;
 }
 
@@ -94,8 +97,8 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
 {
     if (token->kind == TOKEN_INVALID)
         return RET_ERROR;
-    if (token->kind == TOKEN_REDIRECT_R)
-        return handle_redirect(prompt);
+    if (token->kind == TOKEN_REDIRECT_R || token->kind == TOKEN_REDIRECT_RR)
+        return handle_redirect_right(prompt, token);
     if (token->kind == TOKEN_SYMBOL)
         return handle_symbol(prompt, token, lexer);
     if (token->kind == TOKEN_SEMICOLON)
