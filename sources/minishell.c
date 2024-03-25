@@ -9,6 +9,7 @@
 
 #include "minishell.h"
 #include "lexer.h"
+#include "my.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -42,9 +43,12 @@ int minishell(__attribute__((unused)) int argc,
     while (shell.running) {
         if (present_prompt(&shell) == RET_ERROR)
             break;
-        if (parse_input(&shell) == RET_ERROR)
-            break;
-        for (int i = 0; i < shell.prompt->nb_commands; i += 1)
+        if (parse_input(&shell) == RET_ERROR) {
+            shell.cmds_valid = false;
+            shell.last_exit_code = 1;
+        }
+        for (int i = 0; i < shell.prompt->nb_commands &&
+            shell.cmds_valid; i += 1)
             shell.last_exit_code = run_command(&shell,
                 &shell.prompt->commands[i]);
     }

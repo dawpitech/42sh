@@ -51,6 +51,7 @@ typedef struct {
     env_var_t *env_vars;
     int nb_env_var;
     bool running;
+    bool cmds_valid;
     bool isatty;
     char *current_path;
     char *last_path;

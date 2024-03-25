@@ -41,6 +41,7 @@ char *get_from_stdin(void)
 
 int present_prompt(shell_t *shell)
 {
+    shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
     shell->prompt->commands = malloc(sizeof(sh_command_t));
     shell->prompt->nb_commands = 0;
