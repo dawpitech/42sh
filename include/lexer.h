@@ -8,6 +8,7 @@
 #ifndef MINISHELL2_LEXER_H
     #define MINISHELL2_LEXER_H
     #include <stddef.h>
+    #include "minishell.h"
 typedef enum {
     TOKEN_END = 0,
     TOKEN_SYMBOL,
@@ -35,6 +36,8 @@ typedef struct {
     const char *content;
     size_t content_len;
     size_t cursor;
+    bool is_in_command;
+    cmd_t current_cmd;
 } lexer_t;
 
 lexer_t lexer_new(const char *content, size_t content_len);

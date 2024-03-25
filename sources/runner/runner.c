@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "builtins.h"
 #include "utils.h"
@@ -39,21 +40,41 @@ int compute_return_code(int child_status)
 }
 
 static
-int launch_bin(shell_t *shell, char **argv)
+void handle_redirect(shell_t *shell, sh_command_t *cmd)
+{
+    int fd;
+
+    if (cmd->type == REDR) {
+        fd = open(cmd->stdout_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd == -1)
+            exit(EXIT_FAILURE_TECH);
+        dup2(fd, STDOUT_FILENO);
+        close(fd);
+    }
+}
+
+static
+void child_process(shell_t *shell, sh_command_t *cmd)
+{
+    char **env = get_env_array(shell);
+
+    if (cmd->type == REDR || cmd->type == REDL)
+        handle_redirect(shell, cmd);
+    execve(cmd->argv[0], cmd->argv, env);
+    print_error_with_input(cmd->argv[0]);
+    exit(EXIT_FAILURE_TECH);
+}
+
+static
+int launch_bin(shell_t *shell, sh_command_t *cmd)
 {
     pid_t pid;
-    char **env;
     int child_status;
 
-    env = get_env_array(shell);
     pid = fork();
-    if (pid == 0) {
-        execve(argv[0], argv, env);
-        print_error_with_input(argv[0]);
-        exit(1);
-    }
+    if (pid == 0)
+        child_process(shell, cmd);
     waitpid(pid, &child_status, 0);
-    free_env_array(env);
     return compute_return_code(child_status);
 }
 
@@ -86,7 +107,7 @@ int run_command(shell_t *shell, sh_command_t *cmd)
         return return_value;
     if (!my_strstr(cmd->argv[0], "/"))
         resolve_path(shell, cmd);
-    return_value = launch_bin(shell, cmd->argv);
+    return_value = launch_bin(shell, cmd);
     if (return_value == NO_CMD_FOUND) {
         my_put_stderr(cmd->argv[0]);
         my_put_stderr(": Command not found.\n");

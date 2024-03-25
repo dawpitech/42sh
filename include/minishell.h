@@ -24,9 +24,20 @@ typedef struct env_var_s {
     char *value;
     struct env_var_s *next;
 } env_var_t;
+typedef enum {
+    EXPR,
+    REDR,
+    REDL,
+    DBL_REDR,
+    DBL_REDL,
+    PIPE,
+} cmd_t;
 typedef struct {
     char **argv;
     int argc;
+    cmd_t type;
+    char *stdin_file;
+    char *stdout_file;
     int fd_stdin;
     int fd_stdout;
 } sh_command_t;

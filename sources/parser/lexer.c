@@ -116,7 +116,11 @@ token_t lexer_next(lexer_t *l)
         return handle_semicolon(l, &token);
     if (!is_special_char(l->content[l->cursor]))
         return handle_symbols(l, &token);
-    token.kind = TOKEN_INVALID;
+    if (l->content[l->cursor] == '>') {
+        token.kind = TOKEN_REDIRECT_R;
+    } else {
+        token.kind = TOKEN_INVALID;
+    }
     token.text_len = 1;
     l->cursor += 1;
     return token;

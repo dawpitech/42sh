@@ -5,6 +5,9 @@
 ** my_parser header
 */
 
+#include <stdio.h>
+#include <unistd.h>
+
 #include "builtins.h"
 #include "my.h"
 #include "lexer.h"
@@ -25,40 +28,90 @@ void add_arg_to_cmd(sh_command_t *cmd, char const *arg, size_t arg_len)
 }
 
 static
-void handle_symbol(prompt_t *prompt, token_t token, bool *is_in_command)
+void initialize_cmd(sh_command_t *cmd)
 {
-    if (!*is_in_command) {
+    cmd->argc = 0;
+    cmd->argv = NULL;
+    cmd->type = EXPR;
+    cmd->stdin_file = NULL;
+    cmd->stdout_file = NULL;
+    cmd->fd_stdin = STDIN_FILENO;
+    cmd->fd_stdout = STDOUT_FILENO;
+    cmd->type = EXPR;
+}
+
+static
+int handle_redirect_file_name(prompt_t *p, token_t *t, lexer_t *l)
+{
+    char *file_name = malloc(sizeof(char) * (t->text_len + 1));
+
+    if (p->nb_commands == 0) {
+        my_put_stderr("Ratio command.\n");
+        return RET_ERROR;
+    }
+    my_strncpy(file_name, t->text, (int) t->text_len);
+    file_name[t->text_len] = '\0';
+    p->commands[p->nb_commands - 1].stdout_file = file_name;
+    return RET_VALID;
+}
+
+static
+int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
+{
+    if (prompt->nb_commands != 0 && prompt->commands[prompt->nb_commands - 1]
+        .type == REDR)
+        return handle_redirect_file_name(prompt, token, l);
+    if (!l->is_in_command) {
         prompt->nb_commands += 1;
         prompt->commands = my_realloc(prompt->commands, sizeof(sh_command_t) *
             (prompt->nb_commands + 2), sizeof(sh_command_t) *
             (prompt->nb_commands + 1));
-        prompt->commands[prompt->nb_commands - 1].argc = 0;
-        prompt->commands[prompt->nb_commands - 1].argv = NULL;
+        initialize_cmd(&prompt->commands[prompt->nb_commands - 1]);
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
-            token.text, token.text_len);
+            token->text, token->text_len);
         prompt->commands[prompt->nb_commands] = (sh_command_t){0};
-        *is_in_command = true;
+        l->is_in_command = true;
     } else {
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
-            token.text, token.text_len);
+            token->text, token->text_len);
     }
+    return RET_VALID;
+}
+
+static
+int handle_redirect(prompt_t *prompt)
+{
+    if (prompt->nb_commands == 0) {
+        my_put_stderr("Invalid null command.\n");
+        return RET_ERROR;
+    }
+    prompt->commands[prompt->nb_commands - 1].type = REDR;
+    return RET_VALID;
+}
+
+static
+int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
+{
+    if (token->kind == TOKEN_INVALID)
+        return RET_ERROR;
+    if (token->kind == TOKEN_REDIRECT_R)
+        return handle_redirect(prompt);
+    if (token->kind == TOKEN_SYMBOL)
+        return handle_symbol(prompt, token, lexer);
+    if (token->kind == TOKEN_SEMICOLON)
+        lexer->is_in_command = false;
+    return RET_VALID;
 }
 
 int parse_input(shell_t *shell)
 {
     char *const input = shell->prompt->raw_input;
     lexer_t lexer = lexer_new(input, my_strlen(input));
-    bool is_in_command = false;
     token_t token = lexer_next(&lexer);
 
     while (token.kind != TOKEN_END) {
-        if (token.kind == TOKEN_INVALID)
+        if (compute_token(shell->prompt, &token, &lexer) == RET_ERROR)
             return RET_ERROR;
-        if (token.kind == TOKEN_SYMBOL) {
-            handle_symbol(shell->prompt, token, &is_in_command);
-        } else {
-            is_in_command = false;
-        }
         token = lexer_next(&lexer);
     }
     return RET_VALID;
