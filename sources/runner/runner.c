@@ -40,22 +40,22 @@ int compute_return_code(int child_status)
 }
 
 static
-void handle_redirect(sh_command_t *cmd)
+void handle_redirect_r(sh_command_t *cmd)
 {
     int fd;
-    int oflag = O_WRONLY | O_CREAT | O_TRUNC;
+    int oflag;
 
     if (cmd->type == REDR)
+        oflag = O_WRONLY | O_CREAT | O_TRUNC;
+    else
         oflag = O_WRONLY | O_CREAT | O_APPEND;
-    if (cmd->type == REDR || cmd->type == DBL_REDR) {
-        if (cmd->stdout_file == NULL)
-            my_put_stderr("Missing name for redirect.\n");
-        fd = open(cmd->stdout_file, oflag, 0644);
-        if (fd == -1)
-            exit(1);
-        dup2(fd, STDOUT_FILENO);
-        close(fd);
-    }
+    if (cmd->stdout_file == NULL)
+        my_put_stderr("Missing name for redirect.\n");
+    fd = open(cmd->stdout_file, oflag, 0644);
+    if (fd == -1)
+        exit(1);
+    dup2(fd, STDOUT_FILENO);
+    close(fd);
 }
 
 static
@@ -63,8 +63,8 @@ void child_process(shell_t *shell, sh_command_t *cmd)
 {
     char **env = get_env_array(shell);
 
-    if (cmd->type == REDR || cmd->type == REDL)
-        handle_redirect(cmd);
+    if (cmd->type == REDR || cmd->type == DBL_REDR)
+        handle_redirect_r(cmd);
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
     exit(1);

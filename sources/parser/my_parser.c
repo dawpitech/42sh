@@ -58,8 +58,9 @@ int handle_redirect_file_name(prompt_t *p, token_t *t)
 static
 int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
 {
-    if (prompt->nb_commands != 0 && prompt->commands[prompt->nb_commands - 1]
-        .type == REDR)
+    if (prompt->nb_commands != 0 && (prompt->commands[prompt->nb_commands - 1]
+        .type == REDR || prompt->commands[prompt->nb_commands - 1].type ==
+        DBL_REDR))
         return handle_redirect_file_name(prompt, token);
     if (!l->is_in_command) {
         prompt->nb_commands += 1;
@@ -89,6 +90,10 @@ int handle_redirect_right(prompt_t *prompt, token_t *token)
         prompt->commands[prompt->nb_commands - 1].type = REDR;
     if (token->kind == TOKEN_REDIRECT_RR)
         prompt->commands[prompt->nb_commands - 1].type = DBL_REDR;
+    if (token->kind == TOKEN_REDIRECT_L)
+        prompt->commands[prompt->nb_commands - 1].type = REDL;
+    if (token->kind == TOKEN_REDIRECT_LL)
+        prompt->commands[prompt->nb_commands - 1].type = DBL_REDL;
     return RET_VALID;
 }
 
