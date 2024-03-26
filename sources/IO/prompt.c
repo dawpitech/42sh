@@ -32,6 +32,7 @@ char *get_from_stdin(void)
 
     rt_value = (int) getline(&line, &buff_value, stdin);
     if (rt_value <= 0) {
+        my_printf("exit\n");
         free(line);
         return NULL;
     }
