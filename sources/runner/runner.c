@@ -59,12 +59,28 @@ void handle_redirect_r(sh_command_t *cmd)
 }
 
 static
+void handle_redirect_l(sh_command_t *cmd)
+{
+    int fd;
+
+    if (cmd->type == DBL_REDL)
+        return;
+    fd = open(cmd->stdin_file, O_RDONLY);
+    if (fd == -1)
+        exit(1);
+    dup2(fd, STDIN_FILENO);
+    close(fd);
+}
+
+static
 void child_process(shell_t *shell, sh_command_t *cmd)
 {
     char **env = get_env_array(shell);
 
     if (cmd->type == REDR || cmd->type == DBL_REDR)
         handle_redirect_r(cmd);
+    if (cmd->type == REDL || cmd->type == DBL_REDL)
+        handle_redirect_l(cmd);
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
     exit(1);

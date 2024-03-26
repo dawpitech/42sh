@@ -41,7 +41,7 @@ void initialize_cmd(sh_command_t *cmd)
 }
 
 static
-int handle_redirect_file_name(prompt_t *p, token_t *t)
+int handle_redirect_file_name_right(prompt_t *p, token_t *t)
 {
     char *file_name = malloc(sizeof(char) * (t->text_len + 1));
 
@@ -56,12 +56,39 @@ int handle_redirect_file_name(prompt_t *p, token_t *t)
 }
 
 static
+int handle_redirect_file_name_left(prompt_t *p, token_t *t)
+{
+    char *file_name = malloc(sizeof(char) * (t->text_len + 1));
+
+    if (p->nb_commands == 0) {
+        my_put_stderr("Ratio command.\n");
+        return RET_ERROR;
+    }
+    my_strncpy(file_name, t->text, (int) t->text_len);
+    file_name[t->text_len] = '\0';
+    p->commands[p->nb_commands - 1].stdin_file = file_name;
+    return RET_VALID;
+}
+
+static
+int handle_all_redirect(prompt_t *p, token_t *t)
+{
+    if (p->commands[p->nb_commands - 1].type == REDR ||
+        p->commands[p->nb_commands - 1].type == DBL_REDR)
+        return handle_redirect_file_name_right(p, t);
+    if (p->commands[p->nb_commands - 1].type == REDL ||
+        p->commands[p->nb_commands - 1].type == DBL_REDL)
+        return handle_redirect_file_name_left(p, t);
+    return -1;
+}
+
+static
 int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
 {
-    if (prompt->nb_commands != 0 && (prompt->commands[prompt->nb_commands - 1]
-        .type == REDR || prompt->commands[prompt->nb_commands - 1].type ==
-        DBL_REDR))
-        return handle_redirect_file_name(prompt, token);
+    int rt_value = handle_all_redirect(prompt, token);
+
+    if (rt_value != -1)
+        return rt_value;
     if (!l->is_in_command) {
         prompt->nb_commands += 1;
         prompt->commands = my_realloc(prompt->commands, sizeof(sh_command_t) *
