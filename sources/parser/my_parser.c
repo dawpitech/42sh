@@ -107,7 +107,7 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
 }
 
 static
-int handle_redirect_right(prompt_t *prompt, token_t *token)
+int handle_all_redirect_chars(prompt_t *prompt, token_t *token)
 {
     if (prompt->nb_commands == 0) {
         my_put_stderr("Invalid null command.\n");
@@ -129,8 +129,8 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
 {
     if (token->kind == TOKEN_INVALID)
         return RET_ERROR;
-    if (token->kind == TOKEN_REDIRECT_R || token->kind == TOKEN_REDIRECT_RR)
-        return handle_redirect_right(prompt, token);
+    if (token->kind >= TOKEN_REDIRECT_R && token->kind <= TOKEN_REDIRECT_LL)
+        return handle_all_redirect_chars(prompt, token);
     if (token->kind == TOKEN_SYMBOL)
         return handle_symbol(prompt, token, lexer);
     if (token->kind == TOKEN_SEMICOLON)

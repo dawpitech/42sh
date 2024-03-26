@@ -65,6 +65,8 @@ void handle_redirect_l(sh_command_t *cmd)
 
     if (cmd->type == DBL_REDL)
         return;
+    if (cmd->stdin_file == NULL)
+        my_put_stderr("Missing name for redirect.\n");
     fd = open(cmd->stdin_file, O_RDONLY);
     if (fd == -1)
         exit(1);
