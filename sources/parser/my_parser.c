@@ -12,6 +12,7 @@
 #include "my.h"
 #include "lexer.h"
 #include "utils.h"
+#include "pipe_handler.h"
 
 static
 void add_arg_to_cmd(sh_command_t *cmd, char const *arg, size_t arg_len)
@@ -98,6 +99,7 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
             token->text, token->text_len);
         prompt->commands[prompt->nb_commands] = (sh_command_t){0};
+        handle_pipe(prompt);
         l->is_in_command = true;
     } else {
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
@@ -133,8 +135,10 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
         return handle_all_redirect_chars(prompt, token);
     if (token->kind == TOKEN_SYMBOL)
         return handle_symbol(prompt, token, lexer);
-    if (token->kind == TOKEN_SEMICOLON)
+    if (token->kind == TOKEN_SEMICOLON || token->kind == TOKEN_PIPE)
         lexer->is_in_command = false;
+    if (token->kind == TOKEN_PIPE)
+        prompt->commands[prompt->nb_commands - 1].type = PIPE;
     return RET_VALID;
 }
 

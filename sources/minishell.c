@@ -8,8 +8,6 @@
 #include <unistd.h>
 
 #include "minishell.h"
-#include "lexer.h"
-#include "my.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)

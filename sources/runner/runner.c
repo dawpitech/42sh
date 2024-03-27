@@ -54,8 +54,7 @@ void handle_redirect_r(sh_command_t *cmd)
     fd = open(cmd->stdout_file, oflag, 0644);
     if (fd == -1)
         exit(1);
-    dup2(fd, STDOUT_FILENO);
-    close(fd);
+    cmd->fd_stdout = fd;
 }
 
 static
@@ -70,8 +69,7 @@ void handle_redirect_l(sh_command_t *cmd)
     fd = open(cmd->stdin_file, O_RDONLY);
     if (fd == -1)
         exit(1);
-    dup2(fd, STDIN_FILENO);
-    close(fd);
+    cmd->fd_stdin = fd;
 }
 
 static
@@ -83,6 +81,14 @@ void child_process(shell_t *shell, sh_command_t *cmd)
         handle_redirect_r(cmd);
     if (cmd->type == REDL || cmd->type == DBL_REDL)
         handle_redirect_l(cmd);
+    if (cmd->fd_stdin != STDIN_FILENO) {
+        dup2(cmd->fd_stdin, STDIN_FILENO);
+        close(cmd->fd_stdin);
+    }
+    if (cmd->fd_stdout != STDOUT_FILENO) {
+        dup2(cmd->fd_stdout, STDOUT_FILENO);
+        close(cmd->fd_stdout);
+    }
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
     exit(1);
@@ -97,6 +103,10 @@ int launch_bin(shell_t *shell, sh_command_t *cmd)
     pid = fork();
     if (pid == 0)
         child_process(shell, cmd);
+    if (cmd->fd_stdin != STDIN_FILENO)
+        close(cmd->fd_stdin);
+    if (cmd->fd_stdout != STDOUT_FILENO)
+        close(cmd->fd_stdout);
     waitpid(pid, &child_status, 0);
     return compute_return_code(child_status);
 }

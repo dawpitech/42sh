@@ -43,6 +43,7 @@ SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/launcher/path_explorer.c
 SRC	+=	./sources/runner/runner.c
 SRC	+=	./sources/parser/lexer.c
+SRC	+=	./sources/pipe_handler.c
 
 T_SRC	:=	$(SRC)
 T_SRC	+=	./tests/my_tests.c
