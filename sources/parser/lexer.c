@@ -28,12 +28,11 @@ bool my_isspace(char chr)
 static
 bool is_special_char(char chr)
 {
-    static const char SPECIALS_CHARS[] = {'|', ';', '>', '<', '\'', '\"',
-        ' ', '\t', 0};
+    static const char SPECIALS_CHARS[] = {'|', ';', '>', '<', '\'', '\"',0};
     static const size_t S_CHARS_LEN = sizeof(SPECIALS_CHARS) / sizeof(char);
 
     for (size_t i = 0; i < S_CHARS_LEN; i += 1) {
-        if (chr == SPECIALS_CHARS[i])
+        if (chr == SPECIALS_CHARS[i] || my_isspace(chr))
             return true;
     }
     return false;
