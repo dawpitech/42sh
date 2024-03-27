@@ -164,5 +164,10 @@ int parse_input(shell_t *shell)
             return RET_ERROR;
         token = lexer_next(&lexer);
     }
+    if (shell->prompt->commands[shell->prompt->nb_commands - 1].type
+        == PIPE) {
+        my_put_stderr("Invalid null command.\n");
+        return RET_ERROR;
+    }
     return RET_VALID;
 }
