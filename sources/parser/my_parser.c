@@ -127,6 +127,17 @@ int handle_all_redirect_chars(prompt_t *prompt, token_t *token)
 }
 
 static
+int handle_pipe_token(prompt_t *p)
+{
+    if (p->nb_commands == 0) {
+        my_put_stderr("Invalid null command.\n");
+        return RET_ERROR;
+    }
+    p->commands[p->nb_commands - 1].type = PIPE;
+    return RET_VALID;
+}
+
+static
 int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
 {
     if (token->kind == TOKEN_INVALID)
@@ -138,7 +149,7 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
     if (token->kind == TOKEN_SEMICOLON || token->kind == TOKEN_PIPE)
         lexer->is_in_command = false;
     if (token->kind == TOKEN_PIPE)
-        prompt->commands[prompt->nb_commands - 1].type = PIPE;
+        return handle_pipe_token(prompt);
     return RET_VALID;
 }
 
