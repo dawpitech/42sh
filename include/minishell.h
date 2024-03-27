@@ -67,4 +67,5 @@ int add_env_var(shell_t *context, char *key, char *value);
 int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
+void handle_ctrl_c(int signal);
 #endif //MINISHELL_MINISHELL_H

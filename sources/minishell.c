@@ -6,8 +6,10 @@
 */
 
 #include <unistd.h>
+#include <signal.h>
 
 #include "minishell.h"
+#include "my.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -31,11 +33,18 @@ void exiting_hook(shell_t *shell)
     free_env_vars(shell);
 }
 
+void handle_ctrl_c(int signal)
+{
+    (void) signal;
+    my_putstr("\n\033[34m?\033[39m> ");
+}
+
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env)
 {
     shell_t shell = {0};
 
+    signal(SIGINT, handle_ctrl_c);
     if (initialize_shell(&shell, env) != EXIT_SUCCESS_TECH)
         return EXIT_FAILURE_TECH;
     while (shell.running) {
