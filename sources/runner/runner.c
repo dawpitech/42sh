@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#include <stdio.h>
 
 #include "builtins.h"
 #include "utils.h"
