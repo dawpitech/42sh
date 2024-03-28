@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include "builtins.h"
 #include "utils.h"
@@ -16,13 +17,33 @@
 #include "path_explorer.h"
 
 static
+int run_builtins(shell_t *shell, sh_command_t *cmd,
+    int (fptr)(shell_t *, int, char **))
+{
+    int rt_value = NO_CMD_FOUND;
+    int original_stdin = dup(STDIN_FILENO);
+    int original_stdout = dup(STDOUT_FILENO);
+
+    if (cmd->fd_stdin != STDIN_FILENO) {
+        dup2(cmd->fd_stdin, STDIN_FILENO);
+        close(cmd->fd_stdin);
+    }
+    if (cmd->fd_stdout != STDOUT_FILENO) {
+        dup2(cmd->fd_stdout, STDOUT_FILENO);
+        close(cmd->fd_stdout);
+    }
+    rt_value = fptr(shell, cmd->argc, cmd->argv);
+    dup2(original_stdin, STDIN_FILENO);
+    dup2(original_stdout, STDOUT_FILENO);
+    return rt_value;
+}
+
+static
 int search_and_run_builtins(shell_t *shell, sh_command_t *cmd)
 {
-    for (int i = 0; builtins_list[i].cmd != NULL; i += 1) {
-        if (my_strcmp(builtins_list[i].cmd, cmd->argv[0]) == 0) {
-            return builtins_list[i].fptr(shell, cmd->argc, cmd->argv);
-        }
-    }
+    for (int i = 0; builtins_list[i].cmd != NULL; i += 1)
+        if (my_strcmp(builtins_list[i].cmd, cmd->argv[0]) == 0)
+            return run_builtins(shell, cmd, builtins_list[i].fptr);
     return NO_CMD_FOUND;
 }
 
