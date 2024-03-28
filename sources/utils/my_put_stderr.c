@@ -15,13 +15,18 @@
 
 int print_error_with_input(char *input)
 {
-    if (input[0] != '\0') {
+    if (errno == ENOEXEC) {
         my_put_stderr(input);
-        free(input);
+        my_put_stderr(": Exec format error. Wrong Architecture.\n");
+    } else {
+        if (input[0] != '\0') {
+            my_put_stderr(input);
+            free(input);
+        }
+        my_put_stderr(": ");
+        my_put_stderr(strerror(errno));
+        my_put_stderr(".\n");
     }
-    my_put_stderr(": ");
-    my_put_stderr(strerror(errno));
-    my_put_stderr(".\n");
     return RET_ERROR;
 }
 

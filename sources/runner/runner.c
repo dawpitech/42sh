@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "builtins.h"
 #include "utils.h"
@@ -109,6 +110,7 @@ void child_process(shell_t *shell, sh_command_t *cmd)
         dup2(cmd->fd_stdout, STDOUT_FILENO);
         close(cmd->fd_stdout);
     }
+    errno = 0;
     execve(cmd->argv[0], cmd->argv, env);
     print_error_with_input(cmd->argv[0]);
     exit(1);
