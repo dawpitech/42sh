@@ -107,7 +107,7 @@ int launch_bin(shell_t *shell, sh_command_t *cmd)
         close(cmd->fd_stdin);
     if (cmd->fd_stdout != STDOUT_FILENO)
         close(cmd->fd_stdout);
-    waitpid(pid, &child_status, 0);
+    waitpid(pid, &child_status, WNOHANG);
     return compute_return_code(child_status);
 }
 
