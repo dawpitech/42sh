@@ -7,9 +7,11 @@
 
 #include <errno.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "builtins_cmd.h"
+#include "minishell.h"
 #include "my.h"
 #include "my_printf.h"
 #include "utils.h"
@@ -79,6 +81,19 @@ int execute_exit(shell_t *shell, __attribute__((unused)) int argc,
     return EXIT_SUCCESS_TECH;
 }
 
+static
+int search_in_env(env_var_t *env, char *key, char *value)
+{
+    for (env_var_t *tmp = env; tmp != NULL; tmp = tmp->next) {
+        if (my_strcmp(key, tmp->key) == 0) {
+            free(tmp->value);
+            tmp->value = my_strdup(value);
+            return EXIT_SUCCESS_TECH;
+        }
+    }
+    return EXIT_FAILURE_TECH;
+}
+
 int execute_setenv(shell_t *shell, int argc, char **argv)
 {
     if (argc > 3) {
@@ -94,6 +109,8 @@ int execute_setenv(shell_t *shell, int argc, char **argv)
             return EXIT_FAILURE_TECH;
         }
     }
+    if (search_in_env(shell->env_vars, argv[1], argv[2]) == EXIT_SUCCESS_TECH)
+        return EXIT_SUCCESS_TECH;
     if (argc == 2)
         return add_env_var(shell, argv[1], NULL);
     return add_env_var(shell, argv[1], argv[2]);
