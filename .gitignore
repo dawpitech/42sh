@@ -64,3 +64,6 @@ dkms.conf
 mysh
 unit_tests
 *.bin
+
+#Vim
+*.json
