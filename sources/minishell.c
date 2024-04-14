@@ -25,9 +25,22 @@ int initialize_shell(shell_t *shell, char **env)
 }
 
 static
+void free_prompt(prompt_t *prompt)
+{
+    free(prompt->raw_input);
+    free(prompt->commands->stdin_file);
+    free(prompt->commands->stdout_file);
+    for (int i = 0; prompt->commands->argv[i] != NULL; i ++)
+        free(prompt->commands->argv[i]);
+    free(prompt->commands->argv);
+    free(prompt);
+}
+
+static
 void exiting_hook(shell_t *shell)
 {
     free(shell->current_path);
+    free_prompt(shell->prompt);
     if (shell->last_path != NULL)
         free(shell->last_path);
     free_env_vars(shell);

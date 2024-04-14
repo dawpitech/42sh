@@ -74,12 +74,14 @@ int handle_redirect_file_name_left(prompt_t *p, token_t *t)
 static
 int handle_all_redirect(prompt_t *p, token_t *t)
 {
-    if (p->commands[p->nb_commands - 1].type == REDR ||
-        p->commands[p->nb_commands - 1].type == DBL_REDR)
-        return handle_redirect_file_name_right(p, t);
-    if (p->commands[p->nb_commands - 1].type == REDL ||
-        p->commands[p->nb_commands - 1].type == DBL_REDL)
-        return handle_redirect_file_name_left(p, t);
+    if (p->nb_commands > 0) {
+        if (p->commands[p->nb_commands - 1].type == REDR ||
+            p->commands[p->nb_commands - 1].type == DBL_REDR)
+            return handle_redirect_file_name_right(p, t);
+        if (p->commands[p->nb_commands - 1].type == REDL ||
+            p->commands[p->nb_commands - 1].type == DBL_REDL)
+            return handle_redirect_file_name_left(p, t);
+    }
     return -1;
 }
 
@@ -93,8 +95,8 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
     if (!l->is_in_command) {
         prompt->nb_commands += 1;
         prompt->commands = my_realloc(prompt->commands, sizeof(sh_command_t) *
-            (prompt->nb_commands + 2), sizeof(sh_command_t) *
-            (prompt->nb_commands + 1));
+            (prompt->nb_commands + 1), sizeof(sh_command_t) *
+            (prompt->nb_commands));
         initialize_cmd(&prompt->commands[prompt->nb_commands - 1]);
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
             token->text, token->text_len);
