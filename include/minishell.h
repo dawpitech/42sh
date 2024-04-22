@@ -77,6 +77,7 @@ int remove_env_var(shell_t *context, char *key);
 void handle_ctrl_c(int signal);
 void history_add(shell_t *shell, char const *line);
 history_entry_t *history_get(shell_t *shell, int index);
-void load_history(shell_t *shell);
+int write_hist(shell_t *shell);
+int load_history(shell_t *shell);
 void history_free(shell_t *shell);
 #endif //MINISHELL_MINISHELL_H
