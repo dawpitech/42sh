@@ -7,6 +7,9 @@
 
 #include <malloc.h>
 #include <stddef.h>
+#include <termios.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "minishell.h"
 #include "my.h"
@@ -26,18 +29,54 @@ void print_prompt(shell_t *shell)
 static
 char *get_from_stdin(void)
 {
-    char *line = NULL;
-    size_t buff_value = 0;
-    int rt_value;
+    struct termios new_config;
+    struct termios old_config;
+    char *input;
+    int c;
 
-    rt_value = (int) getline(&line, &buff_value, stdin);
-    if (rt_value <= 0) {
-        my_printf("exit\n");
-        free(line);
-        return NULL;
-    }
-    line[my_strlen(line) - 1] = '\0';
-    return line;
+    input = calloc(1, sizeof(char) * 4096);
+    tcgetattr(STDIN_FILENO, &old_config);
+    new_config = old_config;
+    new_config.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
+    printf("\033[6 q"); 
+    do {
+        c = getchar();
+        if (c == '\n')
+            break;
+        if (c == 127) {
+            if (strlen(input) > 0) {
+                input[strlen(input) - 1] = '\0';
+                write(STDOUT_FILENO, "\033[D", 3);
+                write(STDOUT_FILENO, "\033[K", 3);
+                write(STDOUT_FILENO, " ", 1);
+                write(STDOUT_FILENO, "\033[D", 3);
+            }
+            continue;
+        }
+        if (c == 27) {
+            (void) !getchar();
+            c = getchar();
+            switch (c) {
+                case 'D':
+                    write(STDOUT_FILENO, "\033[D", 3);
+                    break;
+                case 'C':
+                    write(STDOUT_FILENO, "\033[C", 3);
+                    break;
+                default:
+                    fprintf(stderr, "%c - %d\n", c, c);
+                    break;
+            }
+            continue;
+        }
+        write(STDOUT_FILENO, &c, 1);
+        input[strlen(input)] = (char) c;
+        input[strlen(input) + 1] = '\0';
+    } while (true);
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_config);
+    printf("\n");
+    return input;
 }
 
 int present_prompt(shell_t *shell)
