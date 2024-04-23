@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "minishell.h"
-#include "my.h"
 
 static
 void mov_ptr_to_delete(env_var_t *prev, env_var_t *curr, shell_t *context)
@@ -25,7 +24,7 @@ env_var_t *get_env_var(shell_t *context, char *key)
     env_var_t *curr = context->env_vars;
 
     while (curr != NULL) {
-        if (my_strcmp(curr->key, key) == 0)
+        if (strcmp(curr->key, key) == 0)
             return curr;
         curr = curr->next;
     }
@@ -39,8 +38,8 @@ int add_env_var(shell_t *context, char *key, char *value)
 
     if (new == NULL)
         return EXIT_FAILURE_TECH;
-    new->key = my_strdup(key);
-    new->value = my_strdup(value);
+    new->key = strdup(key);
+    new->value = strdup(value);
     new->next = NULL;
     context->nb_env_var += 1;
     if (*last == NULL) {
@@ -60,7 +59,7 @@ int remove_env_var(shell_t *context, char *key)
     bool is_remove = false;
 
     while (curr != NULL) {
-        if (my_strcmp(curr->key, key) == 0) {
+        if (strcmp(curr->key, key) == 0) {
             mov_ptr_to_delete(prev, curr, context);
             free(curr);
             is_remove = true;
@@ -81,7 +80,7 @@ int parse_env_var(shell_t *context, char **env)
     char *value;
 
     for (int i = 0; env[i] != NULL; i += 1) {
-        current_str = my_strdup(env[i]);
+        current_str = strdup(env[i]);
         key = strtok(current_str, "=");
         value = strtok(NULL, "=");
         if (add_env_var(context, key, value) == EXIT_FAILURE_TECH)

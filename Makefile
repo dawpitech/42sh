@@ -22,8 +22,6 @@ T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
 T_CFLAGS	+=	--coverage
 
-LIBS_FLAGS	=	-L./lib/ -lmy
-
 BDIR	=	.build
 T_BDIR	=	.buildTests
 
@@ -57,11 +55,11 @@ T_OBJ	=	$(T_SRC:%.c=$(T_BDIR)/%.o)
 
 all:	$(NAME)
 
-$(NAME):	build_lib $(OBJ)
-	$(CC) $(OBJ) $(CFLAGS) -o $(NAME) $(LIBS_FLAGS)
+$(NAME):	$(OBJ)
+	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
 
-$(T_NAME):	fclean build_lib $(T_OBJ)
-	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME) $(LIBS_FLAGS)
+$(T_NAME):	fclean $(T_OBJ)
+	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME)
 
 $(T_BDIR)/%.o:	%.c
 	@ mkdir -p $(dir $@)
@@ -85,9 +83,6 @@ tests_run_pp:	$(T_NAME)
 	@ mkdir -p $(GCOVR_OUTPUT)
 	@ gcovr --exclude=tests --html-details $(GCOVR_OUTPUT)/output.html
 
-build_lib:
-	@ make -C ./lib/my/
-
 clean:
 	@ rm -f $(T_OBJ)
 	@ rm -f $(OBJ)
@@ -100,7 +95,6 @@ fclean:	clean
 	@ rm -f $(T_NAME)
 	@ rm -f $(SEGFAULT_NAME)
 	@ rm -f $(FP_EXECP_NAME)
-	@ make -C ./lib/my/ fclean
 
 re:	fclean all
 
@@ -110,5 +104,5 @@ segfault:
 floating:
 	$(CC) bonus/fp_exception.c -o $(FP_EXECP_NAME)
 
-.PHONY : all asan tests_run_pp tests_run build_lib clean fclean re segfault
-.PHONY : floating debug
+.PHONY : all asan tests_run_pp tests_run clean fclean re segfault floating
+.PHONY : debug
