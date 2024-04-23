@@ -19,15 +19,15 @@ typedef enum {
     TOKEN_REDIRECT_RR,
     TOKEN_REDIRECT_LL,
     TOKEN_INVALID,
-} token_kind_e;
+} token_kind_t;
 
 typedef struct {
     const char *text;
-    token_kind_e kind;
+    token_kind_t kind;
 } token_representation_t;
 
 typedef struct {
-    token_kind_e kind;
+    token_kind_t kind;
     const char *text;
     size_t text_len;
 } token_t;
@@ -42,7 +42,7 @@ typedef struct {
 
 lexer_t lexer_new(const char *content, size_t content_len);
 token_t lexer_next(lexer_t *l);
-char *get_token_kind_as_str(token_kind_e kind);
+char *get_token_kind_as_str(token_kind_t kind);
 void lexer_trim_ws_left(lexer_t *l);
 
 #endif //MINISHELL2_LEXER_H
