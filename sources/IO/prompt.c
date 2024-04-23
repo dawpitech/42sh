@@ -48,6 +48,7 @@ int present_prompt(shell_t *shell)
         return RET_ERROR;
     print_prompt(shell);
     shell->prompt->raw_input = get_from_stdin();
+    history_add(shell, shell->prompt->raw_input);
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     shell->running = false;
