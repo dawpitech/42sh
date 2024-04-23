@@ -2,8 +2,7 @@
 ** EPITECH PROJECT, 2024
 ** parser
 ** File description:
-** parser
-*/
+** parser */
 
 #include "lexer_ast.h"
 #include "minishell.h"
@@ -98,18 +97,18 @@ int parse_input(shell_t *mysh)
     token_t *token = NULL;
 
     mysh->list = lexer(mysh, mysh->list);
-    if (!mysh->list)
-        return RET_ERROR;
-    root = init_root();
-    token = mysh->list->head;
-    if (token->type != IDENTIFIER && token->type != SEMICOLOMN
-        && token->type != AND && token->type != D_AND) {
-        dprintf(2, "Invalid null command.\n");
-        return RET_ERROR;
-    }
-    root = loop_root(root, &token);
-    if (!root)
-        return RET_ERROR;
-    mysh->root = root;
+    // if (!mysh->list)
+    //     return RET_ERROR;
+    // root = init_root();
+    // token = mysh->list->head;
+    // if (token->type != IDENTIFIER && token->type != SEMICOLOMN
+    //     && token->type != AND && token->type != D_AND) {
+    //     dprintf(2, "Invalid null command.\n");
+    //     return RET_ERROR;
+    // }
+    // root = loop_root(root, &token);
+    // if (!root)
+    //     return RET_ERROR;
+    // mysh->root = root;
     return RET_VALID;
 }

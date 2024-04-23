@@ -13,6 +13,8 @@ typedef enum {
     TOKEN_END = 0,
     TOKEN_SYMBOL,
     TOKEN_PIPE,
+    TOKEN_AND,
+    TOKEN_OR,
     TOKEN_SEMICOLON,
     TOKEN_REDIRECT_R,
     TOKEN_REDIRECT_L,
@@ -26,11 +28,11 @@ typedef struct {
     token_kind_e kind;
 } token_representation_t;
 
-typedef struct {
-    token_kind_e kind;
-    const char *text;
-    size_t text_len;
-} token_t;
+// typedef struct {
+//     token_kind_e kind;
+//     const char *text;
+//     size_t text_len;
+// } token_t;
 
 typedef struct {
     const char *content;

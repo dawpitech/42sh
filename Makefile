@@ -36,14 +36,35 @@ SRC = ./sources/minishell.c
 SRC	+=	./sources/builtins_cmd.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
-SRC	+=	./sources/parser/my_parser.c
+# SRC	+=	./sources/parser/my_parser.c
 SRC	+=	./sources/IO/prompt.c
 SRC	+=	./sources/utils/mem_toolbox.c
 SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/launcher/path_explorer.c
 SRC	+=	./sources/runner/runner.c
-SRC	+=	./sources/parser/lexer.c
-SRC	+=	./sources/pipe_handler.c
+# SRC	+=	./sources/parser/lexer.c
+# SRC	+=	./sources/pipe_handler.c
+SRC +=	./sources/parser_ast/lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_is_operator.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isalpha_lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isalphanum_lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isand.c
+SRC +=	./sources/parser_ast/lib_lexer/my_issemicol.c
+SRC +=	./sources/parser_ast/lib_lexer/my_left_redirect.c
+SRC +=	./sources/parser_ast/lib_lexer/my_right_redirect.c
+SRC +=	./sources/parser_ast/lib_lexer/my_ispipe.c
+SRC +=	./sources/parser_ast/lib_lexer/my_list_len.c
+SRC +=	./sources/parser_ast/parser.c
+SRC +=	./sources/parser_ast/utils/pipe_utils.c
+SRC +=	./sources/parser_ast/utils/root_utils.c
+SRC +=	./sources/parser_ast/utils/semicol_utils.c
+SRC +=	./sources/parser_ast/utils/redirect_utils.c
+SRC +=  ./sources/parser_ast/utils/handle_double_quote.c
+SRC +=  ./sources/parser_ast/utils/handle_single_quote.c
+SRC +=  ./sources/parser_ast/utils/handle_parenthese.c
+SRC +=	./sources/parser_ast/memory_management_parser/realloc_parser.c
+SRC +=	./sources/parser_ast/memory_management_parser/free_parser_lexer.c
+SRC +=	./sources/parser_ast/memory_management_parser/init_parser_struct.c
 
 T_SRC	:=	$(SRC)
 T_SRC	+=	./tests/my_tests.c
@@ -58,7 +79,7 @@ T_OBJ	=	$(T_SRC:%.c=$(T_BDIR)/%.o)
 all:	$(NAME)
 
 $(NAME):	build_lib $(OBJ)
-	$(CC) $(OBJ) $(CFLAGS) -o $(NAME) $(LIBS_FLAGS)
+	$(CC) $(OBJ) -o $(NAME) $(LIBS_FLAGS)
 
 $(T_NAME):	fclean build_lib $(T_OBJ)
 	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME) $(LIBS_FLAGS)

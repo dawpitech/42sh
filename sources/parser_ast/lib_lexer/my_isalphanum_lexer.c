@@ -9,24 +9,24 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-int my_isalphanum(list_t *list, token_t *node)
+int my_isalphanum(list_t *l, token_t *node)
 {
-    if (isdigit(list->input[list->cursor]) == 1 ||
-        my_isalpha_lexer(list->input[list->cursor]) == 0 ||
-        list->input[list->cursor] == '_' ||
-        list->input[list->cursor] == '-' ||
-        list->input[list->cursor] == '~') {
+    if (isdigit(l->input[l->cursor]) ||
+        my_isalpha_lexer(l->input[l->cursor]) == 0 ||
+        l->input[l->cursor] == '_' ||
+        l->input[l->cursor] == '-' ||
+        l->input[l->cursor] == '~' || l->input[l->cursor] == '!') {
         node->type = IDENTIFIER;
-        node->text = strndup(&list->input[list->cursor], 1);
-        list->cursor += 1;
-        while (isdigit(list->input[list->cursor]) == 1 ||
-            my_isalpha_lexer(list->input[list->cursor]) == 0 ||
-            list->input[list->cursor] == '_' ||
-            list->input[list->cursor] == '-' ||
-            list->input[list->cursor] == '~') {
+        node->text = strndup(&l->input[l->cursor], 1);
+        l->cursor += 1;
+        while (isdigit(l->input[l->cursor]) ||
+            my_isalpha_lexer(l->input[l->cursor]) == 0 ||
+            l->input[l->cursor] == '_' ||
+            l->input[l->cursor] == '-' ||
+            l->input[l->cursor] == '~' || l->input[l->cursor] == '!') {
             node->text = realloc(node->text, strlen(node->text) + 2);
-            node->text = strncat(node->text, &list->input[list->cursor], 1);
-            list->cursor += 1;
+            node->text = strncat(node->text, &l->input[l->cursor], 1);
+            l->cursor += 1;
         }
         return 1;
     }

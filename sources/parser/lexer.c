@@ -29,7 +29,7 @@ static
 bool is_special_char(char chr)
 {
     static const char SPECIALS_CHARS[] = {'|', ';', '>',
-        '<', '\'', '\"', 0};
+        '<', '\'', '\"', '&', 0};
     static const size_t S_CHARS_LEN = sizeof(SPECIALS_CHARS) / sizeof(char);
 
     for (size_t i = 0; i < S_CHARS_LEN; i += 1) {
@@ -101,6 +101,10 @@ void search_literals(lexer_t *l, token_t *token)
         token->kind = TOKEN_REDIRECT_RR;
     if (my_strncmp("<<", &(l->content[l->cursor]), 2) == 0)
         token->kind = TOKEN_REDIRECT_LL;
+    if (my_strncmp("||", &(l->content[l->cursor]), 2) == 0)
+        token->kind = TOKEN_OR;
+    if (my_strncmp("&&", &(l->content[l->cursor]), 2) == 0)
+        token->kind = TOKEN_AND;
     if (token->kind != TOKEN_END) {
         token->text_len += 2;
         l->cursor += 2;

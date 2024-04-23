@@ -32,7 +32,7 @@ pipe_t *fill_first_cmd_tab(pipe_t *new_pipe, token_t **token)
         free(new_pipe);
         return NULL;
     }
-    new_pipe->tab_command = realloc_tab_cmd(new_pipe);
+    // new_pipe->tab_command = realloc_tab_cmd(new_pipe);
     if (!new_pipe->tab_command) {
         free(new_pipe);
         return NULL;
@@ -50,7 +50,7 @@ pipe_t *add_in_tab(pipe_t *new_pipe, token_t **token)
 {
     if (!new_pipe || !token)
         return NULL;
-    if (realloc_tab_cmd(new_pipe) == RET_ERROR)
+    // if (realloc_tab_cmd(new_pipe) == RET_ERROR)
         return NULL;
     if (!new_pipe->tab_command) {
         free(new_pipe);

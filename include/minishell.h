@@ -12,8 +12,10 @@
     #define EXIT_FAILURE_TECH 84
     #define EXIT_SUCCESS_TECH 0
     #define NO_CMD_FOUND (-42)
-    #include <stdbool.h>
     #include <stdlib.h>
+    #include <stdbool.h>
+    #include "lexer_ast.h"
+    #include "parser_ast.h"
     #ifndef WCOREDUMP
         #define WCOREDUMP(x) 0
     #endif
@@ -30,7 +32,9 @@ typedef enum {
     REDL,
     DBL_REDR,
     DBL_REDL,
-    PIPE,
+    // PIPE,
+    // OR,
+    // AND
 } cmd_t;
 typedef struct {
     char **argv;
@@ -49,6 +53,8 @@ typedef struct {
 typedef struct {
     prompt_t *prompt;
     env_var_t *env_vars;
+    list_t *list;
+    root_t *root;
     int nb_env_var;
     bool running;
     bool cmds_valid;
@@ -68,4 +74,6 @@ int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
 void handle_ctrl_c(int signal);
+list_t *lexer(shell_t *mysh, list_t *list);
+int parser_of_lexer(shell_t *mysh);
 #endif //MINISHELL_MINISHELL_H

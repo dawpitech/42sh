@@ -78,12 +78,13 @@ list_t *lexer(shell_t *mysh, list_t *list)
 {
     token_t *tmp = NULL;
     token_t *prev = NULL;
+    int i = 0;
 
     if (!mysh || strlen(mysh->prompt->raw_input) <= 0)
         return NULL;
     list = init_list(list, mysh->prompt->raw_input);
     list->head = init_node(list->head);
-    while (list->cursor < list->input_len) {
+    while (list->cursor < list->input_len && i < 15) {
         tmp = next_token(list, init_node(NULL));
         if (tmp->type == INVALID)
             return NULL;
@@ -92,6 +93,8 @@ list_t *lexer(shell_t *mysh, list_t *list)
         else
             prev->next = tmp;
         prev = tmp;
+        i += 1;
+        printf("%s %d\n", prev->text, prev->type);
     }
     return list;
 }

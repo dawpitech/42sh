@@ -140,6 +140,28 @@ int handle_pipe_token(prompt_t *p)
 }
 
 static
+int handle_or_token(prompt_t *p)
+{
+    if (p->nb_commands == 0) {
+        my_put_stderr("Invalid null command.\n");
+        return RET_ERROR;
+    }
+    p->commands[p->nb_commands - 1].type = OR;
+    return RET_VALID;
+}
+
+static
+int handle_and_token(prompt_t *p)
+{
+    if (p->nb_commands == 0) {
+        my_put_stderr("Invalid null command.\n");
+        return RET_ERROR;
+    }
+    p->commands[p->nb_commands - 1].type = AND;
+    return RET_VALID;
+}
+
+static
 int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
 {
     if (token->kind == TOKEN_INVALID)
@@ -148,10 +170,15 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
         return handle_all_redirect_chars(prompt, token);
     if (token->kind == TOKEN_SYMBOL)
         return handle_symbol(prompt, token, lexer);
-    if (token->kind == TOKEN_SEMICOLON || token->kind == TOKEN_PIPE)
+    if (token->kind == TOKEN_SEMICOLON || token->kind == TOKEN_PIPE
+        || token->kind == TOKEN_OR || token->kind == TOKEN_AND)
         lexer->is_in_command = false;
+    if (token->kind == TOKEN_AND)
+        return handle_and_token(prompt);
     if (token->kind == TOKEN_PIPE)
         return handle_pipe_token(prompt);
+    if (token->kind == TOKEN_OR)
+        return handle_or_token(prompt);
     return RET_VALID;
 }
 
@@ -164,10 +191,13 @@ int parse_input(shell_t *shell)
     while (token.kind != TOKEN_END) {
         if (compute_token(shell->prompt, &token, &lexer) == RET_ERROR)
             return RET_ERROR;
+        printf("%d\n", token.kind);
         token = lexer_next(&lexer);
     }
     if (shell->prompt->commands[shell->prompt->nb_commands - 1].type
-        == PIPE) {
+        == PIPE || shell->prompt->commands[shell->prompt->nb_commands - 1].type
+        == OR || shell->prompt->commands[shell->prompt->nb_commands - 1].type
+        == AND) {
         my_put_stderr("Invalid null command.\n");
         return RET_ERROR;
     }
