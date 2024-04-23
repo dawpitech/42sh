@@ -34,10 +34,12 @@ FP_EXECP_NAME	=	floating.bin
 
 SRC = ./sources/minishell.c
 SRC	+=	./sources/builtins_cmd.c
+SRC	+=	./sources/builtins_history.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
 SRC	+=	./sources/parser/my_parser.c
 SRC	+=	./sources/IO/prompt.c
+SRC	+=	./sources/IO/history.c
 SRC	+=	./sources/utils/mem_toolbox.c
 SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/launcher/path_explorer.c

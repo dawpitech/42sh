@@ -12,6 +12,7 @@
     #define EXIT_FAILURE_TECH 84
     #define EXIT_SUCCESS_TECH 0
     #define NO_CMD_FOUND (-42)
+    #define HISTORY_FILE (".history")
     #include <stdbool.h>
     #include <stdlib.h>
     #ifndef WCOREDUMP
@@ -47,8 +48,14 @@ typedef struct {
     char *raw_input;
 } prompt_t;
 typedef struct {
+    char *line;
+    time_t timestamp;
+} history_entry_t;
+typedef struct {
     prompt_t *prompt;
     env_var_t *env_vars;
+    history_entry_t **history_entries;
+    unsigned int history_size;
     int nb_env_var;
     bool running;
     bool cmds_valid;
@@ -68,4 +75,9 @@ int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
 void handle_ctrl_c(int signal);
+void history_add(shell_t *shell, char const *line);
+history_entry_t *history_get(shell_t *shell, int index);
+int write_hist(shell_t *shell);
+int load_history(shell_t *shell);
+void history_free(shell_t *shell);
 #endif //MINISHELL_MINISHELL_H
