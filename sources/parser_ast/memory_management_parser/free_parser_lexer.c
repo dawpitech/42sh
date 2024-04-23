@@ -1,0 +1,55 @@
+/*
+** EPITECH PROJECT, 2024
+** memory_management_parser
+** File description:
+** free_parser
+*/
+
+#include <stdlib.h>
+#include "parser_ast.h"
+#include "lexer_ast.h"
+
+static
+void free_tab(char **tab)
+{
+    for (int i = 0; tab[i] != NULL; i ++)
+        free(tab[i]);
+    free(tab);
+}
+static
+void free_command(commands_t *command)
+{
+    if (command) {
+        free(command->str);
+        free_tab(command->args);
+        free(command);
+    }
+}
+
+void free_lexer_list(list_t *list)
+{
+    for (token_t *tmp = list->head; tmp != NULL; tmp = tmp->next) {
+        free(tmp->text);
+    }
+    free(list->input);
+    free(list);
+}
+
+void free_parser(root_t *root)
+{
+//     int i = 0;
+//     int j = 0;
+//
+//     for (; root->tab_sc[i] != NULL; i ++) {
+//         for (; root->tab_sc[i]->tab_pipe[0]->tab_command[j] != NULL; j ++) {
+//             free_command(root->tab_sc[i]->tab_pipe[0]->tab_command[j]);
+//         }
+//         free(root->tab_sc[i]);
+//     }
+//     free(root);
+}
+
+void free_parser_lexer(root_t *root, __attribute__((unused))list_t *list)
+{
+    free_parser(root);
+}
