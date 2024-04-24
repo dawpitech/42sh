@@ -38,7 +38,6 @@ SRC	+=	./sources/env/env_converter.c
 SRC	+=	./sources/parser/my_parser.c
 SRC	+=	./sources/IO/prompt.c
 SRC	+=	./sources/IO/history.c
-SRC	+=	./sources/utils/mem_toolbox.c
 SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/launcher/path_explorer.c
 SRC	+=	./sources/runner/runner.c

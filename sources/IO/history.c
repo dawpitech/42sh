@@ -10,7 +10,6 @@
 #include <stdio.h>
 
 #include "minishell.h"
-#include "my.h"
 
 void history_add(shell_t *shell, char const *line)
 {
@@ -19,7 +18,7 @@ void history_add(shell_t *shell, char const *line)
         sizeof(history_entry_t *)* shell->history_size);
     shell->history_entries[shell->history_size - 1] =
         malloc(sizeof(history_entry_t));
-    shell->history_entries[shell->history_size - 1]->line = my_strdup(line);
+    shell->history_entries[shell->history_size - 1]->line = strdup(line);
     shell->history_entries[shell->history_size - 1]->timestamp = time(NULL);
 }
 

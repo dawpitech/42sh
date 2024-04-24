@@ -93,7 +93,7 @@ int execute_setenv(shell_t *shell, int argc, char **argv)
                 "alphanumeric characters.\n");
             return EXIT_FAILURE_TECH;
         }
-    }my_
+    }
     if (argc == 2)
         return add_env_var(shell, argv[1], NULL);
     return add_env_var(shell, argv[1], argv[2]);
