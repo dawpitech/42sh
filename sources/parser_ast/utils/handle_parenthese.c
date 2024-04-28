@@ -6,43 +6,30 @@
 */
 
 #include "lexer_ast.h"
+#include "minishell.h"
+#include "parser_ast.h"
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-static
-int check_parenthese(list_t *l, token_t *node)
+int handle_parenthese(pipe_t *pipe, token_t **token)
 {
-    if (l->input[l->cursor] == ')') {
-        dprintf(2, "Too many )'s.\n");
-        node->type = INVALID;
-        return 84;
-    }
-    node->type = IDENTIFIER;
-    l->cursor += 1;
-    if (l->input[l->cursor] == ')') {
-        dprintf(2, "Badly placed ()'s.\n");
-        node->type = INVALID;
-        return 84;
-    }
-    return 0;
-}
+    char *str = NULL;
 
-int handle_parenthese(list_t *l, token_t *node)
-{
-    if (check_parenthese(l, node) == 84)
-        return 84;
-    node->text = strndup(&l->input[l->cursor], 1);
-    while (l->input[l->cursor] != ')' && l->input[l->cursor] != '\0') {
-        l->cursor += 1;
-        if (l->input[l->cursor] != ')')
-            node->text = strncat(node->text, &l->input[l->cursor], 1);
+    if ((*token)->type != L_PAREN)
+        return RET_VALID;
+    (*token) = (*token)->next;
+    str = strdup((*token)->text);
+    (*token) = (*token)->next;
+    while ((*token)->type != R_PAREN) {
+        str = realloc(str,
+            sizeof(char) * (strlen(str) + strlen((*token)->text) + 2));
+        str = strcat(str, " ");
+        str = strcat(str, (*token)->text);
+        (*token) = (*token)->next;
     }
-    if (l->input[l->cursor] == ')') {
-        l->cursor += 1;
-    } else {
-        dprintf(2, "Too many ('s.\n");
-        node->type = INVALID;
-        return 84;
-    }
-    return 0;
+    pipe->tab_command[pipe->size]->sub_shell = parse_input(str);
+    if (!pipe->tab_command[pipe->size]->sub_shell)
+        return RET_ERROR;
+    return RET_VALID;
 }

@@ -64,7 +64,7 @@ typedef struct {
     int last_exit_code;
 } shell_t;
 int present_prompt(shell_t *shell);
-int parse_input(shell_t *shell);
+root_t *parse_input(char *raw_input);
 int run_command(shell_t *shell, sh_command_t *cmd);
 char **get_env_array(shell_t *shell);
 void free_env_array(char **array);
@@ -74,6 +74,6 @@ int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
 void handle_ctrl_c(int signal);
-list_t *lexer(shell_t *mysh, list_t *list);
+list_t *lexer(char *raw_input, list_t *list);
 int parser_of_lexer(shell_t *mysh);
 #endif //MINISHELL_MINISHELL_H

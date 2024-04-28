@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include "lexer_ast.h"
 #include "minishell.h"
+
 static
 token_t *init_node(token_t *new)
 {
@@ -54,10 +55,11 @@ token_t *next_token(list_t *list, token_t *node)
 {
     node = init_node(node);
     remove_space(list);
-    if (list->cursor >= list->input_len) {
+    if (list->cursor >= list->input_len)
         return node;
-    }
-    if (is_operator(list, node) == 1)
+    if (is_operator(list, node) == 1 || is_operator(list, node) == 84)
+        return node;
+    if (my_isparenthese(list, node) == 1)
         return node;
     if (my_ispipe(list, node) == 1)
         return node;
@@ -65,27 +67,26 @@ token_t *next_token(list_t *list, token_t *node)
         return node;
     if (my_issemicol(list, node) == 1)
         return node;
-    if (my_isredirect_command_to_file(list, node) == 1)
-        return node;
-    if (my_isredirect_file_to_command(list, node) == 1)
+    if (is_redirection(list, node) == 1)
         return node;
     if (my_isalphanum(list, node) == 0)
         return node;
     return node;
 }
 
-list_t *lexer(shell_t *mysh, list_t *list)
+list_t *lexer(char *raw_input, list_t *list)
 {
     token_t *tmp = NULL;
     token_t *prev = NULL;
-    int i = 0;
 
-    if (!mysh || strlen(mysh->prompt->raw_input) <= 0)
+    if (!raw_input || strlen(raw_input) <= 0)
         return NULL;
-    list = init_list(list, mysh->prompt->raw_input);
+    list = init_list(list, raw_input);
     list->head = init_node(list->head);
-    while (list->cursor < list->input_len && i < 15) {
+    while (1) {
         tmp = next_token(list, init_node(NULL));
+        if (tmp->type == END)
+            break;
         if (tmp->type == INVALID)
             return NULL;
         if (prev == NULL)
@@ -93,8 +94,6 @@ list_t *lexer(shell_t *mysh, list_t *list)
         else
             prev->next = tmp;
         prev = tmp;
-        i += 1;
-        printf("%s %d\n", prev->text, prev->type);
     }
     return list;
 }

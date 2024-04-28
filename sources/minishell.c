@@ -63,7 +63,7 @@ int minishell(__attribute__((unused)) int argc,
     while (shell.running) {
         if (present_prompt(&shell) == RET_ERROR)
             break;
-        if (parse_input(&shell) == RET_ERROR) {
+        if (parse_input(shell.prompt->raw_input) == NULL) {
             shell.cmds_valid = false;
             shell.last_exit_code = 1;
         }

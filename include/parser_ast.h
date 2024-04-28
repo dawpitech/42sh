@@ -11,11 +11,15 @@
     #include "lexer_ast.h"
     #include <stddef.h>
 
+typedef struct root_s root_t;
+
 typedef struct commands_s {
     char *str;
     char **args;
+    int nb_args;
     int fd_in;
     int fd_out;
+    root_t *sub_shell;
 } commands_t;
 
 typedef struct pipe_s {
@@ -44,10 +48,11 @@ typedef struct root_s {
 } root_t;
 
 // MEMORY MANAGEMENT
-char **realloc_args(char **old_args, token_t *token);
+int realloc_args(commands_t *command, token_t *token);
 int realloc_tab_cmd(pipe_t *pipe);
-int realloc_tab_sc(semicol_t *sm);
-int realloc_tab_pipe(pipe_t *pipe);
+int realloc_tab_sc(root_t *root);
+int realloc_tab_pipe(or_t *or);
+int realloc_tab_and(semicol_t *sm);
 pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
 root_t *init_root(void);
@@ -71,5 +76,13 @@ pipe_t *fill_first_cmd_tab(pipe_t *new_pipe, token_t **token);
 semicol_t *loop_semicol(semicol_t *new, token_t **token);
 root_t *loop_root(root_t *root, token_t **token);
 pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token);
+or_t *loop_or(or_t *or, token_t **token);
+and_t *loop_and(and_t *and, token_t **token);
+
+// PARENTHESE
+int handle_parenthese(pipe_t *pipe, token_t **node);
+
+// OPERATOR
+char *handle_operator(token_t **token);
 
 #endif /* PARSER_H */

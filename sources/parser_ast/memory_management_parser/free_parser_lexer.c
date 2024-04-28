@@ -16,6 +16,7 @@ void free_tab(char **tab)
         free(tab[i]);
     free(tab);
 }
+
 static
 void free_command(commands_t *command)
 {
@@ -37,16 +38,7 @@ void free_lexer_list(list_t *list)
 
 void free_parser(root_t *root)
 {
-//     int i = 0;
-//     int j = 0;
-//
-//     for (; root->tab_sc[i] != NULL; i ++) {
-//         for (; root->tab_sc[i]->tab_pipe[0]->tab_command[j] != NULL; j ++) {
-//             free_command(root->tab_sc[i]->tab_pipe[0]->tab_command[j]);
-//         }
-//         free(root->tab_sc[i]);
-//     }
-//     free(root);
+    free(root);
 }
 
 void free_parser_lexer(root_t *root, __attribute__((unused))list_t *list)

@@ -6,6 +6,7 @@
 */
 
 #include "lexer_ast.h"
+#include <stdlib.h>
 
 int my_ispipe(list_t *list, token_t *node)
 {
@@ -15,6 +16,7 @@ int my_ispipe(list_t *list, token_t *node)
         list->cursor += 1;
         if (list->input[list->cursor] == '|') {
             node->type = OR;
+            node->text = realloc(node->text, sizeof(char *) * 2);
             node->text = strncat(node->text, &list->input[list->cursor], 1);
             list->cursor += 1;
         }

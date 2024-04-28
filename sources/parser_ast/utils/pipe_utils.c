@@ -6,13 +6,25 @@
 */
 
 #include "minishell.h"
-#include "my.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "parser_ast.h"
 #include "lexer_ast.h"
+
+static
+int init_command(commands_t *c)
+{
+    c->str = NULL;
+    c->args = NULL;
+    c->args = NULL;
+    c->nb_args = 0;
+    c->fd_in = STDIN_FILENO;
+    c->fd_out = STDOUT_FILENO;
+    c->sub_shell = NULL;
+    return RET_VALID;
+}
 
 int init_fd(pipe_t *s_pipe)
 {
@@ -21,69 +33,105 @@ int init_fd(pipe_t *s_pipe)
     if (pipe(fd) == -1) {
         return RET_ERROR;
     }
-    s_pipe->tab_command[s_pipe->size]->fd_in = fd[0];
-    s_pipe->tab_command[s_pipe->size - 1]->fd_out = fd[1];
+    s_pipe->tab_command[s_pipe->size - 1]->fd_in = fd[0];
+    s_pipe->tab_command[s_pipe->size - 2]->fd_out = fd[1];
     return RET_VALID;
 }
 
-pipe_t *fill_first_cmd_tab(pipe_t *new_pipe, token_t **token)
+int realloc_tab_cmd(pipe_t *p)
 {
-    if ((*token)->type != IDENTIFIER) {
-        free(new_pipe);
-        return NULL;
-    }
-    // new_pipe->tab_command = realloc_tab_cmd(new_pipe);
-    if (!new_pipe->tab_command) {
-        free(new_pipe);
-        return NULL;
-    }
-    new_pipe->tab_command[new_pipe->size] = parser_command(token);
-    if (!new_pipe->tab_command[new_pipe->size]) {
-        free(new_pipe);
-        return NULL;
-    }
-    return new_pipe;
+    if (!p)
+        return RET_ERROR;
+    if (p->size == 0)
+        p->tab_command = malloc(sizeof(commands_t *) * 2);
+    else
+        p->tab_command = realloc(p->tab_command,
+            sizeof(commands_t) * (p->size + 2));
+    p->tab_command[p->size] = malloc(sizeof(commands_t));
+    if (!p->tab_command || !p->tab_command[p->size])
+        return RET_ERROR;
+    p->tab_command[p->size + 1] = NULL;
+    return RET_VALID;
 }
 
 static
-pipe_t *add_in_tab(pipe_t *new_pipe, token_t **token)
+int add_command(pipe_t *new_pipe, token_t **token, int idx)
 {
-    if (!new_pipe || !token)
-        return NULL;
-    // if (realloc_tab_cmd(new_pipe) == RET_ERROR)
-        return NULL;
-    if (!new_pipe->tab_command) {
+    commands_t *c = malloc(sizeof(commands_t));
+
+    c->str = handle_operator(token);
+    c->args = malloc(sizeof(char *) * 2);
+    c->args[0] = strdup(c->str);
+    c->args[1] = NULL;
+    c->nb_args = 1;
+    c->fd_in = STDIN_FILENO;
+    c->fd_out = STDOUT_FILENO;
+    (*token) = (*token)->next;
+    while (*token && ((*token)->type == IDENTIFIER ||
+        (*token)->type == OPERATOR)) {
+        c->args = realloc(c->args, sizeof(char *) * (c->nb_args + 2));
+        c->args[c->nb_args] = handle_operator(token);
+        c->nb_args += 1;
+        (*token) = (*token)->next;
+    }
+    new_pipe->tab_command[idx] = c;
+    new_pipe->size += 1;
+    return RET_VALID;
+}
+
+static
+int handle_pipe(pipe_t *new_pipe, token_t **token, int idx)
+{
+    if (!(*token) || (*token)->type != PIPE)
+        return RET_VALID;
+    if ((*token)->next->type != IDENTIFIER
+        && (*token)->next->type != OPERATOR) {
+        dprintf(2, "Invalid null command.\n");
         free(new_pipe);
         return NULL;
     }
-    new_pipe->tab_command[new_pipe->size] = parser_command(token);
-    if (!new_pipe->tab_command[new_pipe->size]) {
-        free(new_pipe);
+    (*token) = (*token)->next;
+    if (realloc_tab_cmd(new_pipe) == RET_ERROR)
         return NULL;
+    if (add_command(new_pipe, token, idx) == RET_ERROR)
+        return RET_ERROR;
+    if (init_fd(new_pipe) == RET_ERROR)
+        return RET_ERROR;
+    return RET_VALID;
+}
+
+static
+int handle_redirection(pipe_t *new_pipe, token_t **token)
+{
+    while (*token && ((*token)->type == PIPE || (*token)->type == IN ||
+        (*token)->type == D_IN || (*token)->type == OUT ||
+        (*token)->type == D_OUT)) {
+        if (handle_pipe(new_pipe, token, new_pipe->size) == RET_ERROR)
+            return RET_ERROR;
+        if (loop_redirect(new_pipe, token) == NULL)
+            return RET_ERROR;
     }
-    return new_pipe;
+    return RET_VALID;
 }
 
 pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token)
 {
     if (!new_pipe || !token)
         return NULL;
-    while ((*token) && (*token)->type == PIPE) {
-        if ((*token)->next->type != IDENTIFIER) {
-            dprintf(2, "Invalid null command.\n");
-            free(new_pipe);
+    while ((*token) && ((*token)->type == IDENTIFIER ||
+        (*token)->type == OPERATOR ||
+        (*token)->type == L_PAREN || (*token)->type == R_PAREN)) {
+        if (realloc_tab_cmd(new_pipe) == RET_ERROR)
             return NULL;
-        }
-        *token = (*token)->next;
-        new_pipe->size += 1;
-        new_pipe = add_in_tab(new_pipe, token);
-        if (new_pipe == NULL)
+        if ((*token)->type == L_PAREN &&
+            handle_parenthese(new_pipe, token) == 0)
+            return RET_VALID;
+        if (add_command(new_pipe, token, new_pipe->size) == RET_ERROR)
             return NULL;
-        if (init_fd(new_pipe) == RET_ERROR)
+        if (handle_redirection(new_pipe, token) == RET_ERROR)
             return NULL;
-        if ((*token)->next == NULL) {
-            return new_pipe;
-        }
+        if (!(*token) || (*token)->type == END || (*token)->type != IDENTIFIER)
+            break;
     }
     return new_pipe;
 }
