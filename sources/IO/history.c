@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "minishell.h"
 
@@ -58,13 +59,24 @@ int write_hist(shell_t *shell)
 }
 
 static
+void fix_line(char *line)
+{
+    for (int i = 0; line[i] != '\0'; i += 1) {
+        if (isprint(line[i]))
+            continue;
+        line[i] = '?';
+    }
+}
+
+static
 void analyze_line(shell_t *shell, char *line, time_t *timestamp)
 {
     if (line[0] == '#') {
         line += 2;
         *timestamp = strtol(line, NULL, 10);
     } else {
-        line[strlen(line) - 1] = '\0';
+        if (line[strlen(line) - 1] == '\n')
+            line[strlen(line) - 1] = '\0';
         shell->history_size += 1;
         shell->history_entries = realloc(shell->history_entries,
             sizeof(history_entry_t *) * shell->history_size);
@@ -72,6 +84,7 @@ void analyze_line(shell_t *shell, char *line, time_t *timestamp)
             malloc(sizeof(history_entry_t));
         shell->history_entries[shell->history_size - 1]->line =
             strdup(line);
+        fix_line(shell->history_entries[shell->history_size - 1]->line);
         shell->history_entries[shell->history_size - 1]->timestamp =
             *timestamp;
     }
