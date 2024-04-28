@@ -92,13 +92,12 @@ void analyze_params(char const *param, history_params_t *params)
 int execute_history(shell_t *shell, __attribute__((unused)) int argc,
     __attribute__((unused)) char **argv)
 {
-    history_params_t params= {
+    history_params_t params = {
             .mode = PRINT,
     };
 
     if (argc >= 2 && argv[1] != NULL && strcmp(argv[1], "--help") == 0)
         return print_help();
-
     for (int i = 1; i < argc; i += 1) {
         if (strncmp(argv[i], "-", 1) == 0) {
             analyze_params(argv[i], &params);
