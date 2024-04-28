@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "builtins.h"
-#include "my.h"
 #include "lexer.h"
 #include "utils.h"
 #include "pipe_handler.h"
@@ -19,9 +19,8 @@ void add_arg_to_cmd(sh_command_t *cmd, char const *arg, size_t arg_len)
 {
     char *arg_cpy = malloc(sizeof(char) * (arg_len + 1));
 
-    cmd->argv = my_realloc(cmd->argv, sizeof(char *) * (cmd->argc + 2),
-        sizeof(char *) * (cmd->argc + 1));
-    my_strncpy(arg_cpy, arg, (int) arg_len);
+    cmd->argv = realloc(cmd->argv, sizeof(char *) * (cmd->argc + 2));
+    strncpy(arg_cpy, arg, (int) arg_len);
     arg_cpy[arg_len] = '\0';
     cmd->argv[cmd->argc] = arg_cpy;
     cmd->argv[cmd->argc + 1] = NULL;
@@ -50,7 +49,7 @@ int handle_redirect_file_name_right(prompt_t *p, token_t *t)
         my_put_stderr("Ratio command.\n");
         return RET_ERROR;
     }
-    my_strncpy(file_name, t->text, (int) t->text_len);
+    strncpy(file_name, t->text, (int) t->text_len);
     file_name[t->text_len] = '\0';
     p->commands[p->nb_commands - 1].stdout_file = file_name;
     return RET_VALID;
@@ -65,7 +64,7 @@ int handle_redirect_file_name_left(prompt_t *p, token_t *t)
         my_put_stderr("Ratio command.\n");
         return RET_ERROR;
     }
-    my_strncpy(file_name, t->text, (int) t->text_len);
+    strncpy(file_name, t->text, (int) t->text_len);
     file_name[t->text_len] = '\0';
     p->commands[p->nb_commands - 1].stdin_file = file_name;
     return RET_VALID;
@@ -92,9 +91,8 @@ int handle_symbol(prompt_t *prompt, token_t *token, lexer_t *l)
         return rt_value;
     if (!l->is_in_command) {
         prompt->nb_commands += 1;
-        prompt->commands = my_realloc(prompt->commands, sizeof(sh_command_t) *
-            (prompt->nb_commands + 2), sizeof(sh_command_t) *
-            (prompt->nb_commands + 1));
+        prompt->commands = realloc(prompt->commands, sizeof(sh_command_t) *
+            (prompt->nb_commands + 2));
         initialize_cmd(&prompt->commands[prompt->nb_commands - 1]);
         add_arg_to_cmd(&prompt->commands[prompt->nb_commands - 1],
             token->text, token->text_len);
@@ -156,7 +154,7 @@ int compute_token(prompt_t *prompt, token_t *token, lexer_t *lexer)
 int parse_input(shell_t *shell)
 {
     char *const input = shell->prompt->raw_input;
-    lexer_t lexer = lexer_new(input, my_strlen(input));
+    lexer_t lexer = lexer_new(input, strlen(input));
     token_t token = lexer_next(&lexer);
 
     while (token.kind != TOKEN_END) {

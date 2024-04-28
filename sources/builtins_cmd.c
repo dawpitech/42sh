@@ -8,10 +8,10 @@
 #include <errno.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "builtins_cmd.h"
-#include "my.h"
-#include "my_printf.h"
 #include "utils.h"
 
 static
@@ -23,15 +23,15 @@ char *compute_cd_path(shell_t *shell, int argc, char **argv)
         my_put_stderr("cd: Too many arguments.");
         return NULL;
     }
-    if (argc == 1 || my_strcmp(argv[1], "~") == 0) {
+    if (argc == 1 || strcmp(argv[1], "~") == 0) {
         if (home_var != NULL)
-            return my_strdup(home_var->value);
+            return strdup(home_var->value);
         my_put_stderr("No $home variable set.\n");
         return NULL;
     }
-    if (my_strcmp(argv[1], "-") == 0)
-        return shell->last_path == NULL ? "\0" : my_strdup(shell->last_path);
-    return my_strdup(argv[1]);
+    if (strcmp(argv[1], "-") == 0)
+        return shell->last_path == NULL ? "\0" : strdup(shell->last_path);
+    return strdup(argv[1]);
 }
 
 static
@@ -106,9 +106,9 @@ int execute_env(shell_t *shell, __attribute__((unused)) int argc,
 
     while (curr != NULL) {
         if (curr->value != NULL) {
-            my_printf("%s=%s\n", curr->key, curr->value);
+            printf("%s=%s\n", curr->key, curr->value);
         } else {
-            my_printf("%s=\n", curr->key);
+            printf("%s=\n", curr->key);
         }
         curr = curr->next;
     }

@@ -7,9 +7,9 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <stdio.h>
 
 #include "minishell.h"
-#include "my.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -38,7 +38,7 @@ void exiting_hook(shell_t *shell)
 void handle_ctrl_c(int signal)
 {
     (void) signal;
-    my_putstr("\n\033[34m?\033[39m> ");
+    printf("%s", "\n\033[34m?\033[39m> ");
 }
 
 int minishell(__attribute__((unused)) int argc,

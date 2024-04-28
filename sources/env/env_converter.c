@@ -5,9 +5,8 @@
 ** env_converter header
 */
 
+#include <string.h>
 #include "minishell.h"
-#include "my.h"
-#include "my_printf.h"
 
 static
 char *format_env_var(env_var_t *env_var)
@@ -18,15 +17,15 @@ char *format_env_var(env_var_t *env_var)
     if (env_var == NULL || env_var->key == NULL)
         return NULL;
     if (env_var->value != NULL)
-        size_to_alloc = sizeof(char) * (my_strlen(env_var->value)
-            + my_strlen(env_var->key) + 3);
+        size_to_alloc = sizeof(char) * (strlen(env_var->value)
+            + strlen(env_var->key) + 3);
     else
-        size_to_alloc = sizeof(char) * (my_strlen(env_var->key) + 2);
+        size_to_alloc = sizeof(char) * (strlen(env_var->key) + 2);
     rst = malloc(size_to_alloc);
-    my_strcpy(rst, env_var->key);
-    my_strcat(rst, "=");
+    strcpy(rst, env_var->key);
+    strcat(rst, "=");
     if (env_var->value != NULL)
-        my_strcat(rst, env_var->value);
+        strcat(rst, env_var->value);
     return rst;
 }
 

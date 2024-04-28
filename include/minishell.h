@@ -7,14 +7,25 @@
 
 #ifndef MINISHELL_MINISHELL_H
     #define MINISHELL_MINISHELL_H
+
+    #include <stdbool.h>
+    #include <stdlib.h>
+
     #define RET_ERROR 84
     #define RET_VALID 0
     #define EXIT_FAILURE_TECH 84
     #define EXIT_SUCCESS_TECH 0
     #define NO_CMD_FOUND (-42)
     #define HISTORY_FILE (".history")
-    #include <stdbool.h>
-    #include <stdlib.h>
+
+    #define IS_LOW(c) (((c) >= 'a' && (c) <= 'z') ? (1) : (0))
+    #define IS_UP(c) (((c) >= 'A' && (c) <= 'Z') ? (1) : (0))
+    #define IS_ALPHA(c) ((IS_LOW(c) || IS_UP(c)) ? (1) : (0))
+    #define IS_NUM(c) (((c) >= '0' && (c) <= '9') ? (1) : (0))
+    #define IS_ALPHANUM(c) ((IS_ALPHA(c) || IS_NUM(c)) ? (1) : (0))
+    #define ABS(c) (((c) > 0) ? (c) : (- (c)))
+    #define POS(c) (((c) > 0) ? (c) : (0))
+
     #ifndef WCOREDUMP
         #define WCOREDUMP(x) 0
     #endif
