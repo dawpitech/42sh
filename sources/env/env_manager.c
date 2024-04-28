@@ -36,10 +36,11 @@ int add_env_var(shell_t *context, char *key, char *value)
     env_var_t **last = &context->env_vars;
     env_var_t *new = malloc(sizeof(env_var_t));
 
-    if (new == NULL)
-        return EXIT_FAILURE_TECH;
+    if (value == NULL)
+        new->value = NULL;
+    else
+        new->value = strdup(value);
     new->key = strdup(key);
-    new->value = strdup(value);
     new->next = NULL;
     context->nb_env_var += 1;
     if (*last == NULL) {
