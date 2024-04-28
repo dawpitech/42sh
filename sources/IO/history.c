@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "minishell.h"
 #include "my.h"
@@ -65,7 +66,8 @@ void analyze_line(shell_t *shell, char *line, time_t *timestamp)
         line += 2;
         *timestamp = strtol(line, NULL, 10);
     } else {
-        line[strlen(line) - 1] = '\0';
+        if (line[strlen(line) - 1] == '\n')
+            line[strlen(line) - 1] = '\0';
         shell->history_size += 1;
         shell->history_entries = realloc(shell->history_entries,
             sizeof(history_entry_t *) * shell->history_size);
