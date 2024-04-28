@@ -52,7 +52,7 @@ int print_hist(shell_t *shell, history_params_t *params)
 static
 int print_help(void)
 {
-    printf("Usage: history [-hTrSL].\n");
+    printf("Usage: history [-hTrSL] (n).\n");
     return EXIT_SUCCESS_TECH;
 }
 
