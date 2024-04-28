@@ -25,7 +25,7 @@
     #define IS_ALPHANUM(c) ((IS_ALPHA(c) || IS_NUM(c)) ? (1) : (0))
     #define ABS(c) (((c) > 0) ? (c) : (- (c)))
     #define POS(c) (((c) > 0) ? (c) : (0))
-    
+
     #ifndef WCOREDUMP
         #define WCOREDUMP(x) 0
     #endif
