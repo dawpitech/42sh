@@ -32,7 +32,6 @@ void print_hist_line(history_entry_t *entry, history_params_t *params, int i)
 static
 int print_hist(shell_t *shell, history_params_t *params)
 {
-    history_entry_t *entry;
     int lines_nb = (params->nb_lignes_to_print == 0) ?
         (int) shell->history_size :
         (int) params->nb_lignes_to_print;

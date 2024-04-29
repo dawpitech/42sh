@@ -95,7 +95,7 @@ int load_history(shell_t *shell)
     FILE *f_stream;
     char *line = NULL;
     size_t buffer_value = 0;
-    time_t timestamp;
+    time_t timestamp = 0;
 
     f_stream = fopen(HISTORY_FILE, "r");
     if (f_stream == NULL)
