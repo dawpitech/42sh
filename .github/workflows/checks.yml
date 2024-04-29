@@ -51,6 +51,7 @@ jobs:
           done
 
   mirror:
+    if: github.event_name == 'push'
     needs: [ coding_style ]
     runs-on: ubuntu-latest
 
