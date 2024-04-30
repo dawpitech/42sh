@@ -5,13 +5,11 @@
 ** parser
 */
 
-#include "lexer_ast.h"
-#include "minishell.h"
-#include "parser_ast.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+
+#include "lexer_ast.h"
+#include "minishell.h"
 
 static
 void display_parser(root_t *root)

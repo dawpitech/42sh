@@ -5,10 +5,10 @@
 ** alias
 */
 
-#ifndef ALIAS_H 
+#ifndef ALIAS_H
     #define ALIAS_H
 
-    #include "minishell.h"
+    #include "../include/minishell.h"
 
 typedef struct alias_s {
     char *alias;

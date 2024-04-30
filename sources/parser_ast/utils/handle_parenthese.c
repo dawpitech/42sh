@@ -5,12 +5,11 @@
 ** handle_parenthese
 */
 
-#include "lexer_ast.h"
-#include "minishell.h"
-#include "parser_ast.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+#include "lexer_ast.h"
+#include "minishell.h"
 
 int handle_parenthese(pipe_t *pipe, token_t **token, shell_t *shell)
 {

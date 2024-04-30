@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "lexer_ast.h"
-#include "parser_ast.h"
 
 char *handle_operator(token_t **token)
 {

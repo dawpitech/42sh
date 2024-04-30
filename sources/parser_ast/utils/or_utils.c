@@ -5,10 +5,10 @@
 ** or_utils
 */
 
-#include "lexer_ast.h"
-#include "parser_ast.h"
-#include "minishell.h"
 #include <stdlib.h>
+
+#include "lexer_ast.h"
+#include "minishell.h"
 
 int realloc_tab_pipe(or_t *or)
 {

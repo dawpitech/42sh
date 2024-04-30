@@ -5,11 +5,11 @@
 ** semicol_utils
 */
 
-#include "lexer_ast.h"
-#include "minishell.h"
-#include "parser_ast.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "lexer_ast.h"
+#include "minishell.h"
 
 int realloc_tab_and(semicol_t *sm)
 {
