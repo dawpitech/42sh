@@ -58,6 +58,7 @@ typedef struct list_s {
     token_t *head;
 } list_t;
 
+list_t *lexer(char *raw_input, list_t *list);
 list_t *init_list(list_t *new, char *input);
 void free_lexer_list(list_t *list);
 int backtrack_lexer(token_t *token);

@@ -55,7 +55,7 @@ int realloc_tab_cmd(pipe_t *p)
 }
 
 static
-int add_command(pipe_t *new_pipe, token_t **token, int idx)
+int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
 {
     commands_t *c = malloc(sizeof(commands_t));
 
@@ -66,6 +66,7 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx)
     c->nb_args = 1;
     c->fd_in = STDIN_FILENO;
     c->fd_out = STDOUT_FILENO;
+    c->shell = shell;
     (*token) = (*token)->next;
     while (*token && ((*token)->type == IDENTIFIER ||
         (*token)->type == OPERATOR)) {
@@ -80,7 +81,7 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx)
 }
 
 static
-int handle_pipe(pipe_t *new_pipe, token_t **token, int idx)
+int handle_pipe(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
 {
     if (!(*token) || (*token)->type != PIPE)
         return RET_VALID;
@@ -93,7 +94,7 @@ int handle_pipe(pipe_t *new_pipe, token_t **token, int idx)
     (*token) = (*token)->next;
     if (realloc_tab_cmd(new_pipe) == RET_ERROR)
         return NULL;
-    if (add_command(new_pipe, token, idx) == RET_ERROR)
+    if (add_command(new_pipe, token, idx, shell) == RET_ERROR)
         return RET_ERROR;
     if (init_fd(new_pipe) == RET_ERROR)
         return RET_ERROR;
@@ -101,12 +102,12 @@ int handle_pipe(pipe_t *new_pipe, token_t **token, int idx)
 }
 
 static
-int handle_redirection(pipe_t *new_pipe, token_t **token)
+int handle_redirection(pipe_t *new_pipe, token_t **token, shell_t *shell)
 {
     while (*token && ((*token)->type == PIPE || (*token)->type == IN ||
         (*token)->type == D_IN || (*token)->type == OUT ||
         (*token)->type == D_OUT)) {
-        if (handle_pipe(new_pipe, token, new_pipe->size) == RET_ERROR)
+        if (handle_pipe(new_pipe, token, new_pipe->size, shell) == RET_ERROR)
             return RET_ERROR;
         if (loop_redirect(new_pipe, token) == NULL)
             return RET_ERROR;
@@ -114,7 +115,7 @@ int handle_redirection(pipe_t *new_pipe, token_t **token)
     return RET_VALID;
 }
 
-pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token)
+pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token, shell_t *shell)
 {
     if (!new_pipe || !token)
         return NULL;
@@ -126,9 +127,9 @@ pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token)
         if ((*token)->type == L_PAREN &&
             handle_parenthese(new_pipe, token) == 0)
             return RET_VALID;
-        if (add_command(new_pipe, token, new_pipe->size) == RET_ERROR)
+        if (add_command(new_pipe, token, new_pipe->size, shell) == RET_ERROR)
             return NULL;
-        if (handle_redirection(new_pipe, token) == RET_ERROR)
+        if (handle_redirection(new_pipe, token, shell) == RET_ERROR)
             return NULL;
         if (!(*token) || (*token)->type == END || (*token)->type != IDENTIFIER)
             break;

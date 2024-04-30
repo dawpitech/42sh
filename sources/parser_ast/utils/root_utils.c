@@ -6,7 +6,6 @@
 */
 
 #include "lexer_ast.h"
-#include "parser_ast.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "minishell.h"
@@ -27,15 +26,15 @@ int realloc_tab_sc(root_t *root)
     return RET_VALID;
 }
 
-root_t *loop_root(root_t *root, token_t **token)
+root_t *loop_root(root_t *root, token_t **token, shell_t *shell)
 {
     while ((*token) && ((*token)->type == IDENTIFIER ||
-        (*token)->type == D_AND)) {
+        (*token)->type == D_AND || (*token)->type == OPERATOR)) {
         if (realloc_tab_sc(root) == RET_ERROR) {
             free(root);
             return NULL;
         }
-        root->tab_sc[root->size] = parser_semicol(token);
+        root->tab_sc[root->size] = parser_semicol(token, shell);
         root->size += 1;
         if (!root || !root->tab_sc[root->size - 1]) {
             free(root);

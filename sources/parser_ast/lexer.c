@@ -12,7 +12,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "lexer_ast.h"
-#include "minishell.h"
 
 static
 token_t *init_node(token_t *new)

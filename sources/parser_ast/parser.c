@@ -29,6 +29,7 @@ void display_parser(root_t *root)
                         printf("\t\t\t\t\tstring : %s args : ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[0]);
                         for (int n = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n] != NULL; n ++)
                             printf("%s ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n]);
+                        printf("size : %li\n", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->size);
                         printf("\n");
                     }
                 }
@@ -37,54 +38,29 @@ void display_parser(root_t *root)
     }
 }
 
-commands_t *parser_command(token_t **token)
-{
-    commands_t *command = malloc(sizeof(commands_t));
-
-    if (!token || ((*token)->type != IDENTIFIER
-        && (*token)->type != OPERATOR)) {
-        return NULL;
-    }
-    command->str = handle_operator(token);
-    command->args = malloc(sizeof(char *) * 2);
-    command->args[0] = strdup(command->str);
-    command->args[1] = NULL;
-    command->nb_args = 1;
-    command->fd_in = STDIN_FILENO;
-    command->fd_out = STDOUT_FILENO;
-    command->sub_shell = NULL;
-    (*token) = (*token)->next;
-    while ((*token) && (*token)->type == IDENTIFIER && (*token)->type != END
-        && (*token)->type == OPERATOR) {
-        command->args[command->nb_args] = handle_operator(token);
-        (*token) = (*token)->next;
-    }
-    return command;
-}
-
-pipe_t *parser_pipe(token_t **token)
+pipe_t *parser_pipe(token_t **token, shell_t *shell)
 {
     pipe_t *new_pipe = NULL;
 
     if (!token)
         return NULL;
     new_pipe = init_pipe();
-    new_pipe = loop_pipe(new_pipe, token);
+    new_pipe = loop_pipe(new_pipe, token, shell);
     return new_pipe;
 }
 
-or_t *parser_or(token_t **token)
+or_t *parser_or(token_t **token, shell_t *shell)
 {
     or_t *new = NULL;
 
     if (!token || ((*token)->type != IDENTIFIER && (*token)->type != OPERATOR))
         return NULL;
     new = init_or();
-    new = loop_or(new, token);
+    new = loop_or(new, token, shell);
     return new;
 }
 
-and_t *parser_and(token_t **token)
+and_t *parser_and(token_t **token, shell_t *shell)
 {
     and_t *new = NULL;
 
@@ -93,11 +69,11 @@ and_t *parser_and(token_t **token)
         return NULL;
     }
     new = init_and();
-    new = loop_and(new, token);
+    new = loop_and(new, token, shell);
     return new;
 }
 
-semicol_t *parser_semicol(token_t **token)
+semicol_t *parser_semicol(token_t **token, shell_t *shell)
 {
     semicol_t *new = NULL;
 
@@ -106,7 +82,7 @@ semicol_t *parser_semicol(token_t **token)
         return NULL;
     }
     new = init_semicol();
-    new = loop_semicol(new, token);
+    new = loop_semicol(new, token, shell);
     return new;
 }
 
@@ -123,7 +99,7 @@ int check_first_type(token_t *token)
     return RET_VALID;
 }
 
-root_t *parse_input(char *raw_input)
+root_t *parse_input(char *raw_input, shell_t *shell)
 {
     root_t *root = NULL;
     token_t *token = NULL;
@@ -139,7 +115,8 @@ root_t *parse_input(char *raw_input)
     token = list->head;
     if (check_first_type(token) == RET_ERROR)
         return NULL;
-    root = loop_root(root, &token);
+    root = loop_root(root, &token, shell);
+    free_lexer_list(list);
     if (!root)
         return NULL;
     display_parser(root);
