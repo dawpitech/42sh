@@ -18,7 +18,6 @@ int realloc_tab_and(semicol_t *sm)
     if (sm->size == 0) {
         sm->tab_and = malloc(sizeof(and_t *) * 2);
     } else {
-        printf("%li\n", sm->size);
         sm->tab_and = realloc(sm->tab_and, sizeof(and_t *) * sm->size + 1);
     }
     sm->tab_and[sm->size] = malloc(sizeof(and_t));
