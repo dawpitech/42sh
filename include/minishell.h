@@ -12,6 +12,7 @@
     #define EXIT_FAILURE_TECH 84
     #define EXIT_SUCCESS_TECH 0
     #define NO_CMD_FOUND (-42)
+    #define CMD_IS_A_PIPE (-69)
     #include <stdlib.h>
     #include <stdbool.h>
     #include "lexer_ast.h"

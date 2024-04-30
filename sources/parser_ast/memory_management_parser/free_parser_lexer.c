@@ -21,8 +21,8 @@ static
 void free_command(commands_t *command)
 {
     if (command) {
-        free(command->str);
-        free_tab(command->args);
+        free(command->exec_name);
+        free_tab(command->argv);
         free(command);
     }
 }

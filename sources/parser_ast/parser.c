@@ -26,9 +26,9 @@ void display_parser(root_t *root)
                     printf("\t\t\ttab_pipe[%d]\n", l);
                     for (int m = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m] != NULL; m ++) {
                         printf("\t\t\t\ttab_command[%d]\n", m);
-                        printf("\t\t\t\t\tstring : %s args : ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[0]);
-                        for (int n = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n] != NULL; n ++)
-                            printf("%s ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n]);
+                        printf("\t\t\t\t\tstring : %s args : ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[0]);
+                        for (int n = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[n] != NULL; n ++)
+                            printf("%s ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[n]);
                         printf("\n");
                     }
                 }
@@ -45,18 +45,18 @@ commands_t *parser_command(token_t **token)
         && (*token)->type != OPERATOR)) {
         return NULL;
     }
-    command->str = handle_operator(token);
-    command->args = malloc(sizeof(char *) * 2);
-    command->args[0] = strdup(command->str);
-    command->args[1] = NULL;
-    command->nb_args = 1;
+    command->exec_name = handle_operator(token);
+    command->argv = malloc(sizeof(char *) * 2);
+    command->argv[0] = strdup(command->exec_name);
+    command->argv[1] = NULL;
+    command->argc = 1;
     command->fd_in = STDIN_FILENO;
     command->fd_out = STDOUT_FILENO;
     command->sub_shell = NULL;
     (*token) = (*token)->next;
     while ((*token) && (*token)->type == IDENTIFIER && (*token)->type != END
         && (*token)->type == OPERATOR) {
-        command->args[command->nb_args] = handle_operator(token);
+        command->argv[command->argc] = handle_operator(token);
         (*token) = (*token)->next;
     }
     return command;

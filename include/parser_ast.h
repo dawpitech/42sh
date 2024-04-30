@@ -14,9 +14,9 @@
 typedef struct root_s root_t;
 
 typedef struct commands_s {
-    char *str;
-    char **args;
-    int nb_args;
+    char *exec_name;
+    char **argv;
+    int argc;
     int fd_in;
     int fd_out;
     root_t *sub_shell;

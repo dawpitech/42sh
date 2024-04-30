@@ -41,6 +41,7 @@ SRC	+=	./sources/utils/mem_toolbox.c
 SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/launcher/path_explorer.c
 SRC	+=	./sources/runner/runner.c
+SRC	+=	./sources/compute/compute_command.c
 SRC +=	./sources/parser_ast/lexer.c
 SRC +=	./sources/parser_ast/backtrack_lexer.c
 SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c
