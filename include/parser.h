@@ -13,8 +13,8 @@
     #include <stddef.h>
 
 typedef struct commands_s {
-    char *str;
-    char **args;
+    char *exec_name;
+    char **argv;
     int fd_in;
     int fd_out;
 } commands_t;

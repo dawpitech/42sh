@@ -8,9 +8,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "lexer.h"
-#include "my.h"
+#include "utils.h"
 
 static
 bool my_isspace(char chr)
@@ -97,9 +98,9 @@ token_t handle_symbols(lexer_t *l, token_t *token)
 static
 void search_literals(lexer_t *l, token_t *token)
 {
-    if (my_strncmp(">>", &(l->content[l->cursor]), 2) == 0)
+    if (strncmp(">>", &(l->content[l->cursor]), 2) == 0)
         token->kind = TOKEN_REDIRECT_RR;
-    if (my_strncmp("<<", &(l->content[l->cursor]), 2) == 0)
+    if (strncmp("<<", &(l->content[l->cursor]), 2) == 0)
         token->kind = TOKEN_REDIRECT_LL;
     if (my_strncmp("||", &(l->content[l->cursor]), 2) == 0)
         token->kind = TOKEN_OR;
@@ -110,11 +111,11 @@ void search_literals(lexer_t *l, token_t *token)
         l->cursor += 2;
         return;
     }
-    if (my_strncmp(">", &(l->content[l->cursor]), 1) == 0)
+    if (strncmp(">", &(l->content[l->cursor]), 1) == 0)
         token->kind = TOKEN_REDIRECT_R;
-    if (my_strncmp("<", &(l->content[l->cursor]), 1) == 0)
+    if (strncmp("<", &(l->content[l->cursor]), 1) == 0)
         token->kind = TOKEN_REDIRECT_L;
-    if (my_strncmp("|", &(l->content[l->cursor]), 1) == 0)
+    if (strncmp("|", &(l->content[l->cursor]), 1) == 0)
         token->kind = TOKEN_PIPE;
     token->text_len += 1;
     l->cursor += 1;

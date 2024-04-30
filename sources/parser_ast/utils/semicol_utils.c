@@ -28,7 +28,7 @@ int realloc_tab_and(semicol_t *sm)
     return RET_VALID;
 }
 
-semicol_t *loop_semicol(semicol_t *s, token_t **token)
+semicol_t *loop_semicol(semicol_t *s, token_t **token, shell_t *shell)
 {
     while ((*token)->type == IDENTIFIER || (*token)->type != END
         || (*token)->type == OPERATOR) {
@@ -38,7 +38,7 @@ semicol_t *loop_semicol(semicol_t *s, token_t **token)
             free(s);
             return NULL;
         }
-        s->tab_and[s->size] = parser_and(token);
+        s->tab_and[s->size] = parser_and(token, shell);
         s->size += 1;
         if (!s || !s->tab_and[s->size - 1]) {
             free(s);

@@ -10,19 +10,18 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "parser_ast.h"
 #include "lexer_ast.h"
 
 static
-int init_command(commands_t *c)
+int init_command(commands_t *c, shell_t *shell)
 {
-    c->str = NULL;
-    c->args = NULL;
-    c->args = NULL;
-    c->nb_args = 0;
+    c->exec_name = NULL;
+    c->argv = NULL;
+    c->argc = 0;
     c->fd_in = STDIN_FILENO;
     c->fd_out = STDOUT_FILENO;
     c->sub_shell = NULL;
+    c->shell = shell;
     return RET_VALID;
 }
 
@@ -59,20 +58,20 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
 {
     commands_t *c = malloc(sizeof(commands_t));
 
-    c->str = handle_operator(token);
-    c->args = malloc(sizeof(char *) * 2);
-    c->args[0] = strdup(c->str);
-    c->args[1] = NULL;
-    c->nb_args = 1;
+    c->exec_name = handle_operator(token);
+    c->argv = malloc(sizeof(char *) * 2);
+    c->argv[0] = strdup(c->exec_name);
+    c->argv[1] = NULL;
+    c->argc = 1;
     c->fd_in = STDIN_FILENO;
     c->fd_out = STDOUT_FILENO;
     c->shell = shell;
     (*token) = (*token)->next;
     while (*token && ((*token)->type == IDENTIFIER ||
         (*token)->type == OPERATOR)) {
-        c->args = realloc(c->args, sizeof(char *) * (c->nb_args + 2));
-        c->args[c->nb_args] = handle_operator(token);
-        c->nb_args += 1;
+        c->argv = realloc(c->argv, sizeof(char *) * (c->argc + 2));
+        c->argv[c->argc] = handle_operator(token);
+        c->argc += 1;
         (*token) = (*token)->next;
     }
     new_pipe->tab_command[idx] = c;

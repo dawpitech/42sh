@@ -5,7 +5,7 @@
 ** redirect_utils
 */
 
-#include "parser_ast.h"
+#include "minishell.h"
 #include "lexer_ast.h"
 #include <stdlib.h>
 #include <fcntl.h>

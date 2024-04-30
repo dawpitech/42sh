@@ -5,6 +5,8 @@
 ** my_char_is_alpha
 */
 
+#include "lexer_ast.h"
+
 int my_isalpha_lexer(char const c)
 {
     if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_'

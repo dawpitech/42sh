@@ -26,10 +26,9 @@ void display_parser(root_t *root)
                     printf("\t\t\ttab_pipe[%d]\n", l);
                     for (int m = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m] != NULL; m ++) {
                         printf("\t\t\t\ttab_command[%d]\n", m);
-                        printf("\t\t\t\t\tstring : %s args : ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[0]);
-                        for (int n = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n] != NULL; n ++)
-                            printf("%s ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->args[n]);
-                        printf("size : %li\n", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->size);
+                        printf("\t\t\t\t\tstring : %s args : ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[0]);
+                        for (int n = 0; root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[n] != NULL; n ++)
+                            printf("%s ", root->tab_sc[i]->tab_and[j]->tab_or[k]->tab_pipe[l]->tab_command[m]->argv[n]);
                         printf("\n");
                     }
                 }

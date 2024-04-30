@@ -5,7 +5,7 @@
 ** init_parser_struct
 */
 
-#include "parser_ast.h"
+#include "minishell.h"
 #include <stdlib.h>
 
 pipe_t *init_pipe(void)

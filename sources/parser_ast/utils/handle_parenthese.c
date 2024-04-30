@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 
-int handle_parenthese(pipe_t *pipe, token_t **token)
+int handle_parenthese(pipe_t *pipe, token_t **token, shell_t *shell)
 {
     char *str = NULL;
 
@@ -28,7 +28,7 @@ int handle_parenthese(pipe_t *pipe, token_t **token)
         str = strcat(str, (*token)->text);
         (*token) = (*token)->next;
     }
-    pipe->tab_command[pipe->size]->sub_shell = parse_input(str);
+    pipe->tab_command[pipe->size]->sub_shell = parse_input(str, shell);
     if (!pipe->tab_command[pipe->size]->sub_shell)
         return RET_ERROR;
     return RET_VALID;

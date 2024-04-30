@@ -26,7 +26,7 @@ int realloc_tab_pipe(or_t *or)
     return RET_VALID;
 }
 
-or_t *loop_or(or_t *or, token_t **token)
+or_t *loop_or(or_t *or, token_t **token, shell_t *shell)
 {
     while ((*token) && ((*token)->type == IDENTIFIER ||
         (*token)->type == OPERATOR ||
@@ -35,7 +35,7 @@ or_t *loop_or(or_t *or, token_t **token)
             free(or);
             return NULL;
         }
-        or->tab_pipe[or->size] = parser_pipe(token);
+        or->tab_pipe[or->size] = parser_pipe(token, shell);
         or->size += 1;
         if (!or || !or->tab_pipe[or->size - 1]) {
             free(or);

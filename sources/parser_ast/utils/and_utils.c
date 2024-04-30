@@ -6,7 +6,6 @@
 */
 
 #include "lexer_ast.h"
-#include "parser_ast.h"
 #include "minishell.h"
 #include <stdlib.h>
 
@@ -26,7 +25,7 @@ int realloc_tab_or(and_t *and)
     return RET_VALID;
 }
 
-and_t *loop_and(and_t *and, token_t **token)
+and_t *loop_and(and_t *and, token_t **token, shell_t *shell)
 {
     while ((*token) && ((*token)->type == IDENTIFIER ||
         (*token)->type == D_AND || (*token)->type == AND ||
@@ -36,7 +35,7 @@ and_t *loop_and(and_t *and, token_t **token)
             free(and);
             return NULL;
         }
-        and->tab_or[and->size] = parser_or(token);
+        and->tab_or[and->size] = parser_or(token, shell);
         and->size += 1;
         if ((*token) == NULL || (*token)->type != OR)
             break;
