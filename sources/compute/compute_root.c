@@ -7,6 +7,11 @@
 
 #include "minishell.h"
 
+/**
+ * This function computes the return value of a root_t
+ * @param root the root of an ast
+ * @return the return value of the whole ast
+ */
 int compute_root(root_t *root)
 {
     int rt_value = RET_ERROR;
