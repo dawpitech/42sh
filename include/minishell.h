@@ -141,6 +141,11 @@ and_t *loop_and(and_t *and, token_t **token, shell_t *shell);
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
 
 // NODES COMPUTES
+int compute_root(root_t *root);
+int compute_semicolon(semicol_t *semicol);
+int compute_and(and_t *and);
+int compute_or(or_t *or);
+int compute_pipe(pipe_t *pipe);
 int compute_cmd(commands_t *cmd);
 
 int minishell(__attribute__((unused)) int argc,

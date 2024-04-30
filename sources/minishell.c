@@ -59,14 +59,13 @@ int minishell(__attribute__((unused)) int argc,
     while (shell.running) {
         if (present_prompt(&shell) == RET_ERROR)
             break;
-        if (parse_input(shell.prompt->raw_input, &shell) == NULL) {
+        shell.root = parse_input(shell.prompt->raw_input, &shell);
+        if (shell.root == NULL) {
             shell.cmds_valid = false;
             shell.last_exit_code = 1;
         }
-        // for (int i = 0; i < shell.prompt->nb_commands &&
-        //     shell.cmds_valid; i += 1)
-        //     shell.last_exit_code = run_command(&shell,
-        //         &shell.prompt->commands[i]);
+        if (shell.cmds_valid)
+            shell.last_exit_code = compute_root(shell.root);
     }
     exiting_hook(&shell);
     return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;

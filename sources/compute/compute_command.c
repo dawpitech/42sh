@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <stdio.h>
 
 #include "minishell.h"
 #include "utils.h"
