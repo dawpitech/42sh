@@ -140,8 +140,8 @@ and_t *loop_and(and_t *and, token_t **token, shell_t *shell);
 // PARENTHESE
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
 
-// OPERATOR
-char *handle_operator(token_t **token);
+// NODES COMPUTES
+int compute_cmd(commands_t *cmd);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);

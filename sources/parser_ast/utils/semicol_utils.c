@@ -14,7 +14,7 @@
 int realloc_tab_and(semicol_t *sm)
 {
     if (!sm)
-        return NULL;
+        return RET_ERROR;
     if (sm->size == 0) {
         sm->tab_and = malloc(sizeof(and_t *) * 2);
     } else {

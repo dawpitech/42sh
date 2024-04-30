@@ -67,6 +67,7 @@ int backtrack_lexer(token_t *token);
 int is_operator(list_t *list, token_t *node);
 int handle_double_quote(list_t *l, token_t *node);
 int handle_single_quote(list_t *l, token_t *node);
+char *handle_operator(token_t **token);
 
 int my_isparenthese(list_t *list, token_t *node);
 int my_isdigit(char c);

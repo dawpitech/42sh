@@ -5,19 +5,10 @@
 ** handle_single_quote
 */
 
+#include <string.h>
+
 #include "lexer_ast.h"
 #include "parser_ast.h"
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-
-static
-char *adress_text(char *text)
-{
-    char *to_return = strdup(text);
-
-    return to_return;
-}
 
 char *handle_operator(token_t **token)
 {
@@ -25,7 +16,7 @@ char *handle_operator(token_t **token)
     char *op = NULL;
 
     if ((*token)->type != OPERATOR)
-        return adress_text((*token)->text);
+        return strdup((*token)->text);
     op = (*token)->text;
     (*token) = (*token)->next;
     if (strcmp("\"", op) != 0 && strcmp("\'", op) != 0)

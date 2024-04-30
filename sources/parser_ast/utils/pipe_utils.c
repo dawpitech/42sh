@@ -12,19 +12,6 @@
 #include <unistd.h>
 #include "lexer_ast.h"
 
-static
-int init_command(commands_t *c, shell_t *shell)
-{
-    c->exec_name = NULL;
-    c->argv = NULL;
-    c->argc = 0;
-    c->fd_in = STDIN_FILENO;
-    c->fd_out = STDOUT_FILENO;
-    c->sub_shell = NULL;
-    c->shell = shell;
-    return RET_VALID;
-}
-
 int init_fd(pipe_t *s_pipe)
 {
     int fd[2] = {0};
@@ -88,11 +75,11 @@ int handle_pipe(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
         && (*token)->next->type != OPERATOR) {
         dprintf(2, "Invalid null command.\n");
         free(new_pipe);
-        return NULL;
+        return RET_ERROR;
     }
     (*token) = (*token)->next;
     if (realloc_tab_cmd(new_pipe) == RET_ERROR)
-        return NULL;
+        return RET_ERROR;
     if (add_command(new_pipe, token, idx, shell) == RET_ERROR)
         return RET_ERROR;
     if (init_fd(new_pipe) == RET_ERROR)

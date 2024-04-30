@@ -12,6 +12,7 @@
 #include "minishell.h"
 #include "utils.h"
 #include "builtins.h"
+#include "path_explorer.h"
 
 static
 int run_builtins(commands_t *cmd, int (fptr)(shell_t *, int, char **))
@@ -94,6 +95,26 @@ int launch_binary(commands_t *cmd)
     return compute_return_code(child_status);
 }
 
+static
+int resolve_path(commands_t *cmd)
+{
+    char *full_path;
+    char *bin_location = search_bin(cmd->shell, cmd);
+
+    if (bin_location == NULL)
+        return NO_CMD_FOUND;
+    full_path = malloc(sizeof(char) * (strlen(bin_location)
+        + strlen(cmd->argv[0]) + 2));
+    if (full_path == NULL)
+        exit(EXIT_FAILURE_TECH);
+    strcpy(full_path, bin_location);
+    strcat(full_path, "/");
+    strcat(full_path, cmd->argv[0]);
+    free(cmd->argv[0]);
+    cmd->argv[0] = full_path;
+    return RET_VALID;
+}
+
 int compute_cmd(commands_t *cmd)
 {
     int return_value;
@@ -101,6 +122,12 @@ int compute_cmd(commands_t *cmd)
     return_value = search_and_run_builtins(cmd);
     if (return_value != NO_CMD_FOUND)
         return return_value;
-
-    return 0;
+    if (!strstr(cmd->argv[0], "/") && resolve_path(cmd)
+        == NO_CMD_FOUND) {
+            cmd->shell->cmds_valid = false;
+            my_put_stderr(cmd->argv[0]);
+            my_put_stderr(": Command not found.\n");
+            return 1;
+    }
+    return launch_binary(cmd);
 }
