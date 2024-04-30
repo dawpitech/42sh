@@ -124,7 +124,7 @@ pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token, shell_t *shell)
         if (realloc_tab_cmd(new_pipe) == RET_ERROR)
             return NULL;
         if ((*token)->type == L_PAREN &&
-            handle_parenthese(new_pipe, token) == 0)
+            handle_parenthese(new_pipe, token, shell) == 0)
             return RET_VALID;
         if (add_command(new_pipe, token, new_pipe->size, shell) == RET_ERROR)
             return NULL;

@@ -68,3 +68,5 @@ unit_tests
 
 #Vim
 *.json
+.cache/
+.idea/
