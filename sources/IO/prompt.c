@@ -27,30 +27,45 @@ void print_prompt(shell_t *shell)
 }
 
 static
+char *add_char(char *string, int cursor_pos, char c)
+{
+    int idx;
+
+    idx = my_strlen(string);
+    while (idx > cursor_pos)
+        {
+            string[idx] = string[idx - 1];
+            idx -= 1;
+        }
+    string[cursor_pos] = c;
+    return string;
+}
+
+static
 char *get_from_stdin(void)
 {
     struct termios new_config;
     struct termios old_config;
     char *input;
     int c;
+    int cursor_pos = 0;
 
     input = calloc(1, sizeof(char) * 4096);
     tcgetattr(STDIN_FILENO, &old_config);
     new_config = old_config;
     new_config.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
-    printf("\033[6 q"); 
+    printf("\033[6 q");
     do {
         c = getchar();
         if (c == '\n')
             break;
         if (c == 127) {
             if (strlen(input) > 0) {
-                input[strlen(input) - 1] = '\0';
                 write(STDOUT_FILENO, "\033[D", 3);
-                write(STDOUT_FILENO, "\033[K", 3);
                 write(STDOUT_FILENO, " ", 1);
                 write(STDOUT_FILENO, "\033[D", 3);
+                input = add_char(input, cursor_pos, input[cursor_pos]);
             }
             continue;
         }
