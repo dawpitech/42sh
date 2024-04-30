@@ -32,11 +32,10 @@ char *add_char(char *string, int cursor_pos, char c)
     int idx;
 
     idx = my_strlen(string);
-    while (idx > cursor_pos)
-        {
+    while (idx > cursor_pos) {
             string[idx] = string[idx - 1];
             idx -= 1;
-        }
+    }
     string[cursor_pos] = c;
     return string;
 }
