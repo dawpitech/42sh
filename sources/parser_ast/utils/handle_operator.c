@@ -6,8 +6,21 @@
 */
 
 #include <string.h>
-
+#include <stdlib.h>
 #include "lexer_ast.h"
+
+static
+char *quoted_string_loop(char *str_quoted, token_t **token, char *op)
+{
+    while (strcmp((*token)->text, op) != 0 && (*token)->type != END) {
+        str_quoted = realloc(str_quoted,
+            sizeof(char) * (strlen(str_quoted) + strlen((*token)->text) + 2));
+        str_quoted = strcat(str_quoted, " ");
+        str_quoted = strcat(str_quoted, (*token)->text);
+        (*token) = (*token)->next;
+    }
+    return str_quoted;
+}
 
 char *handle_operator(token_t **token)
 {
@@ -20,13 +33,10 @@ char *handle_operator(token_t **token)
     (*token) = (*token)->next;
     if (strcmp("\"", op) != 0 && strcmp("\'", op) != 0)
         return NULL;
-    if ((*token)->type != END)
+    if ((*token)->type != END && strcmp((*token)->text, op) != 0)
         str_quoted = strdup((*token)->text);
-    while (strcmp((*token)->text, op) != 0 && (*token)->type != END) {
-        str_quoted = strcat(str_quoted, " ");
-        str_quoted = strcat(str_quoted, (*token)->text);
-        (*token) = (*token)->next;
-    }
+    (*token) = (*token)->next;
+    str_quoted = quoted_string_loop(str_quoted,token, op);
     if ((*token)->type != OPERATOR)
         return NULL;
     return str_quoted;

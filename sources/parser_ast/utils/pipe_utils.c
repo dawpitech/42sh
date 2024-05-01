@@ -41,6 +41,19 @@ int realloc_tab_cmd(pipe_t *p)
 }
 
 static
+void fill_arguments(token_t **token, commands_t *c)
+{
+    while ((*token) && ((*token)->type == IDENTIFIER ||
+        (*token)->type == OPERATOR)) {
+        c->argv = realloc(c->argv, sizeof(char *) * (c->argc + 2));
+        c->argv[c->argc] = handle_operator(token);
+        c->argc += 1;
+        c->argv[c->argc] = NULL;
+        (*token) = (*token)->next;
+    }
+}
+
+static
 int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
 {
     commands_t *c = malloc(sizeof(commands_t));
@@ -54,13 +67,7 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
     c->fd_out = STDOUT_FILENO;
     c->shell = shell;
     (*token) = (*token)->next;
-    while (*token && ((*token)->type == IDENTIFIER ||
-        (*token)->type == OPERATOR)) {
-        c->argv = realloc(c->argv, sizeof(char *) * (c->argc + 2));
-        c->argv[c->argc] = handle_operator(token);
-        c->argc += 1;
-        (*token) = (*token)->next;
-    }
+    fill_arguments(token, c);
     new_pipe->tab_command[idx] = c;
     new_pipe->size += 1;
     return RET_VALID;
@@ -117,7 +124,7 @@ pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token, shell_t *shell)
             return NULL;
         if (handle_redirection(new_pipe, token, shell) == RET_ERROR)
             return NULL;
-        if (!(*token) || (*token)->type == END || (*token)->type != IDENTIFIER)
+        if (!(*token) || (*token)->type == END || (*token)->type != PIPE)
             break;
     }
     return new_pipe;

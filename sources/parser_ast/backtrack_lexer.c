@@ -14,7 +14,7 @@ static
 int check_dquote(token_t *tmp, backtrack_t *bt)
 {
     token_t *dup = NULL;
-    
+
     if (tmp->text[0] != '\"')
         return RET_VALID;
     if ((*bt).count_dquote == 1) {
@@ -38,7 +38,7 @@ static
 int check_squote(token_t *tmp, backtrack_t *bt)
 {
     token_t *dup = NULL;
-    
+
     if (tmp->text[0] != '\'')
         return RET_VALID;
     if ((*bt).count_squote == 1) {
@@ -82,6 +82,16 @@ int check_matching_parenthese(token_t *origin, backtrack_t *bt)
 }
 
 static
+int check_loops(backtrack_t *bt)
+{
+    if ((*bt).loop_count == 4 && (*bt).count_paren == 3)
+        return dprintf(2, "Too many )'s.\n");
+    if ((*bt).loop_count >= 2 && (*bt).count_paren == 1)
+        return dprintf(2, "Badly placed ().\n");
+    return RET_VALID;
+}
+
+static
 int check_parenthese(token_t *token, backtrack_t *bt)
 {
     if (token->type != L_PAREN && token->type != R_PAREN)
@@ -100,22 +110,8 @@ int check_parenthese(token_t *token, backtrack_t *bt)
     else if (check_matching_parenthese(token, bt) == 84)
         return dprintf(2, "Too many ('s.\n");
     (*bt).count_paren += 1;
-    if ((*bt).loop_count == 4 && (*bt).count_paren == 3)
-        return dprintf(2, "Too many )'s.\n");
-    if ((*bt).loop_count >= 2 && (*bt).count_paren == 3)
-        (*bt).error_badly_placed_s = true;
-    if ((*bt).loop_count >= 2 && (*bt).count_paren == 1)
-        (*bt).error_badly_placed_d = true;
-    return RET_VALID;
-}
-
-static
-int check_errors(backtrack_t bt)
-{
-    if (bt.error_badly_placed_s == true)
-        return dprintf(2, "Badly placed (.\n");
-    if (bt.error_badly_placed_d == true)
-        return dprintf(2, "Badly placed ().\n");
+    if (check_loops(bt) != 0)
+        return RET_ERROR;
     return RET_VALID;
 }
 
@@ -128,8 +124,6 @@ int backtrack_lexer(token_t *token)
     for (token_t *tmp = token; tmp != NULL; tmp = tmp->next) {
         bt.loop_count += 1;
         if (check_parenthese(tmp, &bt) != 0)
-            return RET_ERROR;
-        if (check_errors(bt) != 0)
             return RET_ERROR;
         if (check_dquote(tmp, &bt) != 0)
             return RET_ERROR;

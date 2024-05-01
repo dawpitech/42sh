@@ -18,7 +18,7 @@ int realloc_tab_and(semicol_t *sm)
     if (sm->size == 0) {
         sm->tab_and = malloc(sizeof(and_t *) * 2);
     } else {
-        sm->tab_and = realloc(sm->tab_and, sizeof(and_t *) * sm->size + 1);
+        sm->tab_and = realloc(sm->tab_and, sizeof(and_t *) * (sm->size + 2));
     }
     sm->tab_and[sm->size] = malloc(sizeof(and_t));
     if (!sm)
@@ -43,7 +43,7 @@ semicol_t *loop_semicol(semicol_t *s, token_t **token, shell_t *shell)
             free(s);
             return NULL;
         }
-        if (!(*token) || (*token)->type == END || (*token)->type != D_AND)
+        if (!(*token) || (*token)->type == END)
             return s;
         if (*token != NULL)
             *token = (*token)->next;
