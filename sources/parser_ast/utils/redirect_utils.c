@@ -149,7 +149,7 @@ pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token)
 {
     while ((*token) && ((*token)->type == IN || (*token)->type == D_IN ||
         (*token)->type == OUT || (*token)->type == D_OUT)) {
-        if ((*token)->next->type != IDENTIFIER) {
+        if (!(*token)->next || (*token)->next->type != IDENTIFIER) {
             dprintf(2, "Missing name for redirect.\n");
             return NULL;
         }

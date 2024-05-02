@@ -37,12 +37,12 @@ and_t *loop_and(and_t *and, token_t **token, shell_t *shell)
         }
         and->tab_or[and->size] = parser_or(token, shell);
         and->size += 1;
-        if ((*token) == NULL || (*token)->type != D_AND)
-            break;
         if (!and || !and->tab_or[and->size - 1]) {
             free(and);
             return NULL;
         }
+        if ((*token) == NULL || (*token)->type != D_AND)
+            break;
         if ((*token)->next != NULL)
             (*token) = (*token)->next;
     }

@@ -29,8 +29,8 @@ int realloc_tab_and(semicol_t *sm)
 
 semicol_t *loop_semicol(semicol_t *s, token_t **token, shell_t *shell)
 {
-    while ((*token)->type == IDENTIFIER || (*token)->type != END
-        || (*token)->type == OPERATOR) {
+    while ((*token) && ((*token)->type == IDENTIFIER || (*token)->type != END
+        || (*token)->type == OPERATOR)) {
         if (realloc_tab_and(s) == RET_ERROR)
             return NULL;
         if (!s->tab_and) {

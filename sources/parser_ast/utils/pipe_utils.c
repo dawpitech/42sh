@@ -102,8 +102,9 @@ int handle_redirection(pipe_t *new_pipe, token_t **token, shell_t *shell)
         (*token)->type == D_OUT)) {
         if (handle_pipe(new_pipe, token, new_pipe->size, shell) == RET_ERROR)
             return RET_ERROR;
-        if (loop_redirect(new_pipe, token) == NULL)
+        if (loop_redirect(new_pipe, token) == NULL) {
             return RET_ERROR;
+        }
     }
     return RET_VALID;
 }
