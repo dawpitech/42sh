@@ -27,7 +27,8 @@ int initialize_shell(shell_t *shell, char **env)
 static
 void free_prompt(prompt_t *prompt)
 {
-    free(prompt->raw_input);
+    if (prompt->raw_input != NULL)
+        free(prompt->raw_input);
     free(prompt);
 }
 
