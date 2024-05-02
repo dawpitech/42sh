@@ -137,8 +137,6 @@ root_t *loop_root(root_t *root, token_t **token, shell_t *shell);
 pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token);
 or_t *loop_or(or_t *or, token_t **token, shell_t *shell);
 and_t *loop_and(and_t *and, token_t **token, shell_t *shell);
-int handle_exclamation_point(pipe_t *pipe, shell_t *shell, token_t **token,
-    int idx);
 
 // PARENTHESE
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
