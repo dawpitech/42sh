@@ -18,10 +18,21 @@ int print_help(void)
 }
 
 static
-int error_out_of_limit(shell_t *shell)
+int error_out_of_limit(char *nbr)
 {
-    dprintf(2, "%d: Index out of limit.\n", shell->history_size);
-    return RET_ERROR;
+    dprintf(2, "%s: Index out of limit.\n", nbr);
+    return EXIT_FAILURE;
+}
+
+static
+int exec_history_command(shell_t *shell, int index)
+{
+    root_t *root = NULL;
+
+    root = parse_input(shell->history_entries[index]->line, shell);
+    if (root == NULL)
+        return RET_ERROR;
+    return compute_root(root);
 }
 
 int execute_search_history(shell_t *shell, __attribute__((unused)) int argc,
@@ -30,7 +41,8 @@ int execute_search_history(shell_t *shell, __attribute__((unused)) int argc,
     if (argc >= 2 && strcmp(argv[0], "!") == 0 &&
         argv[1] != NULL && strcmp(argv[1], "--help") == 0)
         return print_help();
-    if (atoi(&argv[0][1]) > (int) shell->history_size)
-        return error_out_of_limit(shell);
-    return RET_VALID;
+    if (atoi(argv[1]) > (int) shell->history_size - 2) {
+        return error_out_of_limit(argv[1]);
+    }
+    return exec_history_command(shell, atoi(argv[1]));
 }
