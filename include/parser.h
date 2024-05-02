@@ -28,7 +28,7 @@ typedef struct or_s {
     size_t size;
 } or_t;
 
-typedef struct and_s{
+typedef struct and_s {
     or_t *tab_or;
     size_t size;
 } and_t;

@@ -109,7 +109,7 @@ typedef struct shell_s {
 int realloc_args(commands_t *command, token_t *token);
 int realloc_tab_cmd(pipe_t *pipe);
 int realloc_tab_sc(root_t *root);
-int realloc_tab_pipe(or_t *or);
+int realloc_tab_pipe(or_t *or_obj);
 int realloc_tab_and(semicol_t *sm);
 pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
@@ -135,8 +135,8 @@ pipe_t *fill_first_cmd_tab(pipe_t *new_pipe, token_t **token);
 semicol_t *loop_semicol(semicol_t *new, token_t **token, shell_t *shell);
 root_t *loop_root(root_t *root, token_t **token, shell_t *shell);
 pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token);
-or_t *loop_or(or_t *or, token_t **token, shell_t *shell);
-and_t *loop_and(and_t *and, token_t **token, shell_t *shell);
+or_t *loop_or(or_t *or_obj, token_t **token, shell_t *shell);
+and_t *loop_and(and_t *and_obj, token_t **token, shell_t *shell);
 
 // PARENTHESE
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
@@ -144,8 +144,8 @@ int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
 // NODES COMPUTES
 int compute_root(root_t *root);
 int compute_semicolon(semicol_t *semicol);
-int compute_and(and_t *and);
-int compute_or(or_t *or);
+int compute_and(and_t *and_obj);
+int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
 

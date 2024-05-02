@@ -38,7 +38,7 @@ char *handle_operator(token_t **token)
     if ((*token)->type != END && strcmp((*token)->text, op) != 0)
         str_quoted = strdup((*token)->text);
     (*token) = (*token)->next;
-    str_quoted = quoted_string_loop(str_quoted,token, op);
+    str_quoted = quoted_string_loop(str_quoted, token, op);
     if ((*token)->type != OPERATOR)
         return NULL;
     return str_quoted;

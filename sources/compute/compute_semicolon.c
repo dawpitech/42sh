@@ -1,12 +1,13 @@
-#include <stdio.h>
-#include "minishell.h"
-
 /*
 ** EPITECH PROJECT, 2024
 ** 42sh
 ** File description:
 ** compute_semicolon header
 */
+
+#include <stdio.h>
+
+#include "minishell.h"
 
 /**
  * This function computes an SEMICOLON node

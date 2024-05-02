@@ -10,35 +10,36 @@
 #include <stdlib.h>
 
 static
-int realloc_tab_or(and_t *and)
+int realloc_tab_or(and_t *and_obj)
 {
-    if (!and)
+    if (!and_obj)
         return RET_ERROR;
-    if (and->size == 0)
-        and->tab_or = malloc(sizeof(or_t *) * 2);
+    if (and_obj->size == 0)
+        and_obj->tab_or = malloc(sizeof(or_t *) * 2);
     else
-        and->tab_or = realloc(and->tab_or, sizeof(or_t *) * (and->size + 2));
-    and->tab_or[and->size] = malloc(sizeof(or_t));
-    if (!and->tab_or || !and->tab_or[and->size])
+        and_obj->tab_or = realloc(and_obj->tab_or, sizeof(or_t *) *
+            (and_obj->size + 2));
+    and_obj->tab_or[and_obj->size] = malloc(sizeof(or_t));
+    if (!and_obj->tab_or || !and_obj->tab_or[and_obj->size])
         return RET_ERROR;
-    and->tab_or[and->size + 1] = NULL;
+    and_obj->tab_or[and_obj->size + 1] = NULL;
     return RET_VALID;
 }
 
-and_t *loop_and(and_t *and, token_t **token, shell_t *shell)
+and_t *loop_and(and_t *and_obj, token_t **token, shell_t *shell)
 {
     while ((*token) && ((*token)->type == IDENTIFIER ||
         (*token)->type == D_AND || (*token)->type == AND ||
         (*token)->type == OPERATOR ||
         (*token)->type == L_PAREN || (*token)->type == R_PAREN)) {
-        if (realloc_tab_or(and) == RET_ERROR) {
-            free(and);
+        if (realloc_tab_or(and_obj) == RET_ERROR) {
+            free(and_obj);
             return NULL;
         }
-        and->tab_or[and->size] = parser_or(token, shell);
-        and->size += 1;
-        if (!and || !and->tab_or[and->size - 1]) {
-            free(and);
+        and_obj->tab_or[and_obj->size] = parser_or(token, shell);
+        and_obj->size += 1;
+        if (!and_obj || !and_obj->tab_or[and_obj->size - 1]) {
+            free(and_obj);
             return NULL;
         }
         if ((*token) == NULL || (*token)->type != D_AND)
@@ -46,5 +47,5 @@ and_t *loop_and(and_t *and, token_t **token, shell_t *shell)
         if ((*token)->next != NULL)
             (*token) = (*token)->next;
     }
-    return and;
+    return and_obj;
 }

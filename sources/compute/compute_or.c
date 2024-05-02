@@ -11,20 +11,20 @@
 
 /**
  * This function computes an OR node
- * @param or an or node
+ * @param or_obj an or node
  * @return the return value of the expression
  */
-int compute_or(or_t *or)
+int compute_or(or_t *or_obj)
 {
     int rt_value = RET_ERROR;
     bool last_was_unsuccessful = true;
 
-    if (or == NULL || or->size == 0)
+    if (or_obj == NULL || or_obj->size == 0)
         return RET_ERROR;
-    if (or->size == 1)
-        return compute_pipe(or->tab_pipe[0]);
-    for (int i = 0; (i < (int) or->size) && last_was_unsuccessful; i++) {
-        rt_value = compute_pipe(or->tab_pipe[i]);
+    if (or_obj->size == 1)
+        return compute_pipe(or_obj->tab_pipe[0]);
+    for (int i = 0; (i < (int) or_obj->size) && last_was_unsuccessful; i++) {
+        rt_value = compute_pipe(or_obj->tab_pipe[i]);
         last_was_unsuccessful = (rt_value != RET_VALID) ? true : false;
     }
     return rt_value;
