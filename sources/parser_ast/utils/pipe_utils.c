@@ -40,7 +40,6 @@ int realloc_tab_cmd(pipe_t *p)
     return RET_VALID;
 }
 
-static
 void fill_arguments(token_t **token, commands_t *c)
 {
     while ((*token) && ((*token)->type == IDENTIFIER ||

@@ -11,7 +11,7 @@
     #include <string.h>
     #include <stdbool.h>
 
-    #define LIST_OPERATOR ("\'\n\"")
+    #define LIST_OPERATOR ("!\'\n\"")
 
 typedef enum token_type_s {
     IDENTIFIER,

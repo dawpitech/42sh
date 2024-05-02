@@ -29,6 +29,8 @@ char *handle_operator(token_t **token)
 
     if ((*token)->type != OPERATOR)
         return strdup((*token)->text);
+    if (strcmp((*token)->text, "!") == 0)
+        return strdup((*token)->text);
     op = (*token)->text;
     (*token) = (*token)->next;
     if (strcmp("\"", op) != 0 && strcmp("\'", op) != 0)
