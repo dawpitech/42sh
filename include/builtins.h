@@ -22,6 +22,7 @@ static const builtin_t builtins_list[] = {
     {.cmd = "unsetenv", .fptr = execute_unsetenv},
     {.cmd = "cd", .fptr = execute_cd},
     {.cmd = "history", .fptr = execute_history},
+    {.cmd = "!", .fptr = execute_search_history},
     {.cmd = NULL, .fptr = NULL},
 };
 #endif //MINISHELL_BUILTINS_H
