@@ -148,7 +148,7 @@ int compute_root(root_t *root);
 int compute_semicolon(semicol_t *semicol);
 int compute_and(and_t *and);
 int compute_or(or_t *or);
-int compute_pipe(pipe_t *pipe);
+int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
 
 int minishell(__attribute__((unused)) int argc,
