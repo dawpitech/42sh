@@ -116,6 +116,6 @@ root_t *parse_input(char *raw_input, shell_t *shell)
     free_lexer_list(list);
     if (!root)
         return NULL;
-    display_parser(root);
+    //display_parser(root);
     return root;
 }

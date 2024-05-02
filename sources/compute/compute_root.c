@@ -8,7 +8,7 @@
 #include "minishell.h"
 
 /**
- * This function computes the return value of a root_t
+ * This function computes the return value an AST
  * @param root the root of an ast
  * @return the return value of the whole ast
  */

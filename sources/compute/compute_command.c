@@ -116,6 +116,11 @@ int resolve_path(commands_t *cmd)
     return RET_VALID;
 }
 
+/**
+ * This function computes a COMMAND node
+ * @param cmd a COMMAND node
+ * @return the return value of the expression
+ */
 int compute_cmd(commands_t *cmd)
 {
     int return_value;
