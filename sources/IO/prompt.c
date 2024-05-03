@@ -49,7 +49,8 @@ char *get_from_stdin(int *cursor_pos, shell_t *shell)
                 memmove(&input[*cursor_pos - 1], &input[*cursor_pos],
                         strlen(input) - *cursor_pos + 1);
                 write(STDOUT_FILENO, "\033[2K", 4);
-                write(STDOUT_FILENO, "\r> ", 3);
+                write(STDOUT_FILENO, "\r", 1);
+                print_prompt(shell);
                 write(STDOUT_FILENO, input, len);
                 for (int i = 0; i < (int)len - *cursor_pos; i += 1)
                     write(STDOUT_FILENO, "\033[D", 3);
@@ -86,7 +87,8 @@ char *get_from_stdin(int *cursor_pos, shell_t *shell)
         len += 1;
         *cursor_pos += 1;
         write(STDOUT_FILENO, "\033[2K", 4);
-        write(STDOUT_FILENO, "\r> ", 3);
+        write(STDOUT_FILENO, "\r", 1);
+        print_prompt(shell);
         write(STDOUT_FILENO, input, len);
         for (int i = 0; i < (int)len - *cursor_pos; i += 1)
             write(STDOUT_FILENO, "\033[D", 3);
