@@ -7,6 +7,7 @@
 
 #include <errno.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,13 +21,13 @@ char *compute_cd_path(shell_t *shell, int argc, char **argv)
     env_var_t *home_var = get_env_var(shell, "HOME");
 
     if (argc > 2) {
-        my_put_stderr("cd: Too many arguments.");
+        dprintf(2, "cd: Too many arguments.");
         return NULL;
     }
     if (argc == 1 || strcmp(argv[1], "~") == 0) {
         if (home_var != NULL)
             return strdup(home_var->value);
-        my_put_stderr("No $home variable set.\n");
+        dprintf(2, "No $home variable set.\n");
         return NULL;
     }
     if (strcmp(argv[1], "-") == 0)
@@ -79,6 +80,19 @@ int execute_exit(shell_t *shell, __attribute__((unused)) int argc,
     return EXIT_SUCCESS_TECH;
 }
 
+static
+int search_in_env(env_var_t *env, char *key, char *value)
+{
+    for (env_var_t *tmp = env; tmp != NULL; tmp = tmp->next) {
+        if (strcmp(key, tmp->key) == 0) {
+            free(tmp->value);
+            tmp->value = strdup(value);
+            return EXIT_SUCCESS_TECH;
+        }
+    }
+    return EXIT_FAILURE_TECH;
+}
+
 int execute_setenv(shell_t *shell, int argc, char **argv)
 {
     if (argc > 3) {
@@ -94,6 +108,8 @@ int execute_setenv(shell_t *shell, int argc, char **argv)
             return EXIT_FAILURE_TECH;
         }
     }
+    if (search_in_env(shell->env_vars, argv[1], argv[2]) == EXIT_SUCCESS_TECH)
+        return EXIT_SUCCESS_TECH;
     if (argc == 2)
         return add_env_var(shell, argv[1], NULL);
     return add_env_var(shell, argv[1], argv[2]);

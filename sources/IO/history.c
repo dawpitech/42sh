@@ -14,6 +14,8 @@
 
 void history_add(shell_t *shell, char const *line)
 {
+    if (line == NULL)
+        return;
     shell->history_size += 1;
     shell->history_entries = realloc(shell->history_entries,
         sizeof(history_entry_t *)* shell->history_size);

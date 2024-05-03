@@ -103,8 +103,6 @@ int present_prompt(shell_t *shell)
 {
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
-    shell->prompt->commands = malloc(sizeof(sh_command_t));
-    shell->prompt->nb_commands = 0;
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);

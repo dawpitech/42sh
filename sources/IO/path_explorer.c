@@ -31,7 +31,7 @@ int find_bin_in_dir(char *bin_searched, char *dir_path)
     return RET_ERROR;
 }
 
-char *search_bin(shell_t *shell, sh_command_t *cmd)
+char *search_bin(shell_t *shell, commands_t *cmd)
 {
     char *path = strdup(get_env_var(shell, "PATH")->value);
     char *result = strtok(path, ":");
