@@ -162,6 +162,7 @@ int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
 void handle_ctrl_c(int signal);
+void handle_ctrl_z(int signal);
 void history_add(shell_t *shell, char const *line);
 history_entry_t *history_get(shell_t *shell, int index);
 int write_hist(shell_t *shell);

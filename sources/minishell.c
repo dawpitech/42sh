@@ -49,12 +49,19 @@ void handle_ctrl_c(int signal)
     printf("%s", "\n\033[34m?\033[39m> ");
 }
 
+void handle_ctrl_z(int signal)
+{
+    (void) signal;
+    printf("\a");
+}
+
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env)
 {
     shell_t shell = {0};
 
     signal(SIGINT, handle_ctrl_c);
+    signal(SIGTSTP, handle_ctrl_z);
     if (initialize_shell(&shell, env) != EXIT_SUCCESS_TECH)
         return EXIT_FAILURE_TECH;
     while (shell.running) {
