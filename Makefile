@@ -25,7 +25,7 @@ T_CFLAGS	+=	--coverage
 BDIR	=	.build
 T_BDIR	=	.buildTests
 
-NAME	=	mysh
+NAME	=	42sh
 T_NAME	=	unit_tests
 SEGFAULT_NAME	=	segfault.bin
 FP_EXECP_NAME	=	floating.bin
