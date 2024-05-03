@@ -67,6 +67,7 @@ int minishell(__attribute__((unused)) int argc,
         }
         if (shell.cmds_valid)
             shell.last_exit_code = compute_root(shell.root);
+        history_add(&shell, shell.prompt->raw_input);
     }
     exiting_hook(&shell);
     return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;
