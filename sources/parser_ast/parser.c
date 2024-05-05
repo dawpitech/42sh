@@ -26,7 +26,8 @@ or_t *parser_or(token_t **token, shell_t *shell)
 {
     or_t *new = NULL;
 
-    if ((*token)->type != IDENTIFIER && (*token)->type != OPERATOR)
+    if ((*token)->type != IDENTIFIER && (*token)->type != OPERATOR
+        && (*token)->type != AND)
         return NULL;
     new = init_or();
     new = loop_or(new, token, shell);

@@ -45,6 +45,7 @@ typedef struct commands_s {
     int argc;
     int fd_in;
     int fd_out;
+    bool job_control;
     shell_t *shell;
     root_t *sub_shell;
 } commands_t;
