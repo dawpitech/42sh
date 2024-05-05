@@ -116,7 +116,6 @@ pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
 root_t *init_root(void);
 void free_parser(root_t *root);
-void free_parser_lexer(root_t *root, list_t *list);
 and_t *init_and(void);
 or_t *init_or(void);
 

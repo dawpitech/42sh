@@ -65,6 +65,7 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
     c->fd_in = STDIN_FILENO;
     c->fd_out = STDOUT_FILENO;
     c->shell = shell;
+    c->sub_shell = NULL;
     c->job_control = false;
     (*token) = (*token)->next;
     fill_arguments(token, c);
@@ -114,7 +115,6 @@ int handle_job_control(token_t *t, pipe_t *p, int idx)
 {
     if (!t || t->type != AND)
         return RET_ERROR;
-    printf("Here\n");
     p->tab_command[idx - 1]->job_control = true;
     t = t->next;
     return RET_VALID;
@@ -131,7 +131,7 @@ pipe_t *loop_pipe(pipe_t *new_pipe, token_t **t, shell_t *shell)
             return NULL;
         if ((*t)->type == L_PAREN &&
             handle_parenthese(new_pipe, t, shell) == 0)
-            return RET_VALID;
+            return new_pipe;
         if (add_command(new_pipe, t, new_pipe->size, shell) == RET_ERROR)
             return NULL;
         if (handle_job_control((*t), new_pipe, new_pipe->size) == RET_VALID)
