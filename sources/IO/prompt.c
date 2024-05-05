@@ -23,7 +23,10 @@ bool is_git_repo(void)
     fp = popen("git rev-parse --is-inside-work-tree 2>/dev/null", "r");
     if (fp == NULL)
         return false;
-    fgets(tmp, 1024, fp);
+    if (fgets(tmp, 1024, fp) == NULL) {
+        pclose(fp);
+        return false;
+    }
     if (strncmp(tmp, "true", 4) == 0)
         rt_value = true;
     pclose(fp);
@@ -39,7 +42,10 @@ char *get_git_branch(void)
     fp = popen("git rev-parse --abbrev-ref HEAD", "r");
     if (fp == NULL)
         return NULL;
-    fgets(branch_name, 1024 - 1, fp);
+    if (fgets(branch_name, 1024 - 1, fp) == NULL) {
+        pclose(fp);
+        return NULL;
+    }
     pclose(fp);
     branch_name[strlen(branch_name) - 1] = '\0';
     return branch_name;
@@ -107,7 +113,6 @@ int present_prompt(shell_t *shell)
         return RET_ERROR;
     print_prompt(shell);
     shell->prompt->raw_input = get_from_stdin();
-    history_add(shell, shell->prompt->raw_input);
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     shell->running = false;
