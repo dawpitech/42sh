@@ -26,26 +26,25 @@ int realloc_tab_sc(root_t *root)
     return RET_VALID;
 }
 
-root_t *loop_root(root_t *root, token_t **token, shell_t *shell)
+root_t *loop_root(root_t *root, token_t **t, shell_t *shell)
 {
-    while ((*token) && ((*token)->type == IDENTIFIER ||
-        (*token)->type == D_AND || (*token)->type == OPERATOR)) {
-        if (realloc_tab_sc(root) == RET_ERROR) {
-            free(root);
+    while ((*t) && ((*t)->type == IDENTIFIER || (*t)->type == D_AND ||
+        (*t)->type == OPERATOR || (*t)->type == L_PAREN ||
+        (*t)->type == AND)) {
+        if (realloc_tab_sc(root) == RET_ERROR)
             return NULL;
-        }
-        root->tab_sc[root->size] = parser_semicol(token, shell);
+        root->tab_sc[root->size] = parser_semicol(t, shell);
         root->size += 1;
         if (!root || !root->tab_sc[root->size - 1]) {
             free(root);
             return NULL;
         }
-        if (!(*token) || (*token)->next == NULL || (*token)->type == END)
+        if (!(*t) || (*t)->next == NULL || (*t)->type == END)
             break;
-        if ((*token)->type != SEMICOLOMN)
+        if ((*t)->type != SEMICOLOMN)
             return NULL;
-        if ((*token) != NULL)
-            (*token) = (*token)->next;
+        if ((*t) != NULL)
+            (*t) = (*t)->next;
     }
     return root;
 }

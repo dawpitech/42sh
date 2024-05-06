@@ -24,7 +24,6 @@ int compute_pipe(pipe_t *pipe_obj)
     if (pipe_obj->size == 1)
         return compute_cmd(pipe_obj->tab_command[0]);
     for (int i = 1; i < (int) pipe_obj->size; i++) {
-        printf("Looping for pipe\n");
         if (pipe(fd) == -1)
             return RET_ERROR;
         pipe_obj->tab_command[i]->fd_in = fd[0];

@@ -15,6 +15,14 @@
 #include "history.h"
 
 static
+int count_digits(unsigned int n)
+{
+    if (n / 10 == 0)
+        return 1;
+    return 1 + count_digits(n / 10);
+}
+
+static
 void print_hist_line(history_entry_t *entry, history_params_t *params, int i)
 {
     if (params->hiding_ln) {
@@ -22,7 +30,9 @@ void print_hist_line(history_entry_t *entry, history_params_t *params, int i)
             printf("#+%ld\n", entry->timestamp);
         printf("%s\n", entry->line);
     } else {
-        printf("     %d  %02d:%02d   %s\n", i + 1,
+        for (int k = 0; k < 6 - count_digits(i + 1); k += 1)
+            printf(" ");
+        printf("%d  %02d:%02d   %s\n", i + 1,
             localtime(&entry->timestamp)->tm_hour,
             localtime(&entry->timestamp)->tm_min,
             entry->line);
