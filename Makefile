@@ -46,6 +46,7 @@ SRC	+=	./sources/compute/compute_and.c
 SRC	+=	./sources/compute/compute_or.c
 SRC	+=	./sources/compute/compute_pipe.c
 SRC	+=	./sources/compute/compute_command.c
+SRC	+=	./sources/jobs_control/jobs_manager.c
 SRC +=	./sources/parser_ast/lexer.c
 SRC +=	./sources/parser_ast/backtrack_lexer.c
 SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c

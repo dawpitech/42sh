@@ -23,6 +23,7 @@
     #include "lexer_ast.h"
     #define CMD_IS_A_PIPE (-69)
     #define HISTORY_FILE (".history")
+    #define MAX_JOBS 1024
 
     #define IS_LOW(c) (((c) >= 'a' && (c) <= 'z') ? (1) : (0))
     #define IS_UP(c) (((c) >= 'A' && (c) <= 'Z') ? (1) : (0))
@@ -89,13 +90,27 @@ typedef struct {
     time_t timestamp;
 } history_entry_t;
 
+typedef struct {
+    unsigned int id;
+    commands_t *cmd;
+    pid_t pid;
+    bool is_running;
+    enum {
+        FOREGROUND,
+        BACKGROUND,
+        SUSPENDED,
+    } state;
+} jobs_t;
+
 typedef struct shell_s {
+    jobs_t *process[MAX_JOBS];
     prompt_t *prompt;
     env_var_t *env_vars;
     list_t *list;
     root_t *root;
     history_entry_t **history_entries;
     unsigned int history_size;
+    unsigned int nb_jobs;
     int nb_env_var;
     bool running;
     bool cmds_valid;
@@ -148,6 +163,9 @@ int compute_and(and_t *and_obj);
 int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
+
+// JOBS CONTROL
+jobs_t *new_job(shell_t *shell);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);

@@ -78,6 +78,19 @@ void child_process(commands_t *cmd)
 }
 
 static
+int handle_detached_process(commands_t *cmd, pid_t pid)
+{
+    jobs_t *job = new_job(cmd->shell);
+
+    job->cmd = cmd;
+    job->pid = pid;
+    job->is_running = true;
+    job->state = BACKGROUND;
+    printf("[1] %d\n", pid);
+    return RET_VALID;
+}
+
+static
 int launch_binary(commands_t *cmd)
 {
     pid_t pid;
@@ -92,6 +105,8 @@ int launch_binary(commands_t *cmd)
         close(cmd->fd_out);
         return CMD_IS_A_PIPE;
     }
+    if (cmd->job_control)
+        return handle_detached_process(cmd, pid);
     waitpid(pid, &child_status, 0);
     return compute_return_code(child_status);
 }
