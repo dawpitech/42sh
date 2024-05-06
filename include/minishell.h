@@ -89,12 +89,15 @@ typedef struct {
     time_t timestamp;
 } history_entry_t;
 
+typedef struct alias_s alias_t;
+
 typedef struct shell_s {
     prompt_t *prompt;
     env_var_t *env_vars;
     list_t *list;
     root_t *root;
     history_entry_t **history_entries;
+    alias_t **aliases;
     unsigned int history_size;
     int nb_env_var;
     bool running;

@@ -34,6 +34,7 @@ SRC = ./sources/minishell.c
 SRC	+=	./sources/builtins/builtins_cmd.c
 SRC	+=	./sources/builtins/builtins_history.c
 SRC	+=	./sources/builtins/builtins_search_history.c
+SRC += ./sources/builtins/alias.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
 SRC	+=	./sources/IO/prompt.c

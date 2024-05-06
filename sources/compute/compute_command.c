@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "minishell.h"
+#include "alias.h"
 #include "utils.h"
 #include "builtins.h"
 #include "path_explorer.h"
@@ -76,7 +77,7 @@ void child_process(commands_t *cmd)
     print_error_with_input(cmd->argv[0]);
     exit(1);
 }
-
+    
 static
 int launch_binary(commands_t *cmd)
 {
@@ -116,11 +117,6 @@ int resolve_path(commands_t *cmd)
     return RET_VALID;
 }
 
-/**
- * This function computes a COMMAND node
- * @param cmd a COMMAND node
- * @return the return value of the expression
- */
 int compute_cmd(commands_t *cmd)
 {
     int return_value;

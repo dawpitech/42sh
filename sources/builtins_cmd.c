@@ -9,9 +9,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+
 #include "builtins_cmd.h"
+#include "minishell.h"
 #include "utils.h"
 
 static
@@ -20,18 +20,18 @@ char *compute_cd_path(shell_t *shell, int argc, char **argv)
     env_var_t *home_var = get_env_var(shell, "HOME");
 
     if (argc > 2) {
-        dprintf(2, "cd: Too many arguments.");
+        my_put_stderr("cd: Too many arguments.");
         return NULL;
     }
-    if (argc == 1 || strcmp(argv[1], "~") == 0) {
+    if (argc == 1 || my_strcmp(argv[1], "~") == 0) {
         if (home_var != NULL)
-            return strdup(home_var->value);
-        dprintf(2, "No $home variable set.\n");
+            return my_strdup(home_var->value);
+        my_put_stderr("No $home variable set.\n");
         return NULL;
     }
-    if (strcmp(argv[1], "-") == 0)
-        return shell->last_path == NULL ? "\0" : strdup(shell->last_path);
-    return strdup(argv[1]);
+    if (my_strcmp(argv[1], "-") == 0)
+        return shell->last_path == NULL ? "\0" : my_strdup(shell->last_path);
+    return my_strdup(argv[1]);
 }
 
 static
@@ -83,9 +83,9 @@ static
 int search_in_env(env_var_t *env, char *key, char *value)
 {
     for (env_var_t *tmp = env; tmp != NULL; tmp = tmp->next) {
-        if (strcmp(key, tmp->key) == 0) {
+        if (my_strcmp(key, tmp->key) == 0) {
             free(tmp->value);
-            tmp->value = strdup(value);
+            tmp->value = my_strdup(value);
             return EXIT_SUCCESS_TECH;
         }
     }
@@ -121,9 +121,9 @@ int execute_env(shell_t *shell, __attribute__((unused)) int argc,
 
     while (curr != NULL) {
         if (curr->value != NULL) {
-            printf("%s=%s\n", curr->key, curr->value);
+            my_printf("%s=%s\n", curr->key, curr->value);
         } else {
-            printf("%s=\n", curr->key);
+            my_printf("%s=\n", curr->key);
         }
         curr = curr->next;
     }

@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <string.h>
 
+#include "alias.h"
 #include "path_explorer.h"
 
 static
@@ -31,6 +32,20 @@ int find_bin_in_dir(char *bin_searched, char *dir_path)
     return RET_ERROR;
 }
 
+char *compare_alias(alias_t **alias, char *name)
+{
+    int i = 0;
+
+    while (alias[i] != NULL){
+        if (strcmp(name, alias[i]->alias) == 0){
+            name = alias[i]->cmd;
+            return name;
+        }
+        i++;
+    }
+    return EXIT_SUCCESS_TECH;
+}
+
 char *search_bin(shell_t *shell, commands_t *cmd)
 {
     char *path = strdup(get_env_var(shell, "PATH")->value);
@@ -38,7 +53,8 @@ char *search_bin(shell_t *shell, commands_t *cmd)
     char *rt;
 
     while (result != NULL) {
-        if (find_bin_in_dir(cmd->argv[0], result) == RET_VALID) {
+        if (find_bin_in_dir(compare_alias(shell->aliases, cmd->argv[0]), result)
+        == RET_VALID) {
             rt = strdup(result);
             free(path);
             return rt;
