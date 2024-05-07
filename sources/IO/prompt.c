@@ -42,6 +42,8 @@ struct termios init_termios(void)
 static
 void remove_char(shell_t *shell)
 {
+    if (shell->prompt->cursor_pos <= 0)
+        return;
     if (strlen(shell->prompt->input) > 0) {
         memmove(&shell->prompt->input[shell->prompt->cursor_pos - 1],
                 &shell->prompt->input[shell->prompt->cursor_pos],
