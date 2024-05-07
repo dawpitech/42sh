@@ -11,7 +11,6 @@
 
 #include "utils.h"
 #include "minishell.h"
-#include "my.h"
 
 int print_error_with_input(char *input)
 {
@@ -32,5 +31,5 @@ int print_error_with_input(char *input)
 
 ssize_t my_put_stderr(char const *str)
 {
-    return write(2, str, my_strlen(str));
+    return write(2, str, strlen(str));
 }

@@ -7,9 +7,8 @@
 
 #include <unistd.h>
 #include <signal.h>
-
+#include <stdio.h>
 #include "minishell.h"
-#include "my.h"
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -21,22 +20,33 @@ int initialize_shell(shell_t *shell, char **env)
     shell->current_path = getcwd(NULL, 0);
     shell->last_path = NULL;
     shell->last_exit_code = 0;
+    load_history(shell);
     return RET_VALID;
+}
+
+static
+void free_prompt(prompt_t *prompt)
+{
+    if (prompt->raw_input != NULL)
+        free(prompt->raw_input);
+    free(prompt);
 }
 
 static
 void exiting_hook(shell_t *shell)
 {
     free(shell->current_path);
+    free_prompt(shell->prompt);
     if (shell->last_path != NULL)
         free(shell->last_path);
     free_env_vars(shell);
+    history_free(shell);
 }
 
 void handle_ctrl_c(int signal)
 {
     (void) signal;
-    my_putstr("\n\033[34m?\033[39m> ");
+    printf("%s", "\n\033[34m?\033[39m> ");
 }
 
 int minishell(__attribute__((unused)) int argc,
@@ -50,14 +60,14 @@ int minishell(__attribute__((unused)) int argc,
     while (shell.running) {
         if (present_prompt(&shell) == RET_ERROR)
             break;
-        if (parse_input(&shell) == RET_ERROR) {
+        shell.root = parse_input(shell.prompt->raw_input, &shell);
+        if (shell.root == NULL) {
             shell.cmds_valid = false;
             shell.last_exit_code = 1;
         }
-        for (int i = 0; i < shell.prompt->nb_commands &&
-            shell.cmds_valid; i += 1)
-            shell.last_exit_code = run_command(&shell,
-                &shell.prompt->commands[i]);
+        if (shell.cmds_valid)
+            shell.last_exit_code = compute_root(shell.root);
+        history_add(&shell, shell.prompt->raw_input);
     }
     exiting_hook(&shell);
     return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;

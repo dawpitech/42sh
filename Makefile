@@ -22,28 +22,53 @@ T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
 T_CFLAGS	+=	--coverage
 
-LIBS_FLAGS	=	-L./lib/ -lmy
-
 BDIR	=	.build
 T_BDIR	=	.buildTests
 
-NAME	=	mysh
+NAME	=	42sh
 T_NAME	=	unit_tests
 SEGFAULT_NAME	=	segfault.bin
 FP_EXECP_NAME	=	floating.bin
 
 SRC = ./sources/minishell.c
-SRC	+=	./sources/builtins_cmd.c
+SRC	+=	./sources/builtins/builtins_cmd.c
+SRC	+=	./sources/builtins/builtins_history.c
+SRC	+=	./sources/builtins/builtins_search_history.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
-SRC	+=	./sources/parser/my_parser.c
 SRC	+=	./sources/IO/prompt.c
-SRC	+=	./sources/utils/mem_toolbox.c
+SRC	+=	./sources/IO/history.c
+SRC	+=	./sources/IO/path_explorer.c
 SRC	+=	./sources/utils/my_put_stderr.c
-SRC	+=	./sources/launcher/path_explorer.c
-SRC	+=	./sources/runner/runner.c
-SRC	+=	./sources/parser/lexer.c
-SRC	+=	./sources/pipe_handler.c
+SRC	+=	./sources/compute/compute_root.c
+SRC	+=	./sources/compute/compute_semicolon.c
+SRC	+=	./sources/compute/compute_and.c
+SRC	+=	./sources/compute/compute_or.c
+SRC	+=	./sources/compute/compute_pipe.c
+SRC	+=	./sources/compute/compute_command.c
+SRC +=	./sources/parser_ast/lexer.c
+SRC +=	./sources/parser_ast/backtrack_lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c
+SRC +=	./sources/parser_ast/lib_lexer/my_is_operator.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isalpha_lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isalphanum_lexer.c
+SRC +=	./sources/parser_ast/lib_lexer/my_isand.c
+SRC +=	./sources/parser_ast/lib_lexer/my_issemicol.c
+SRC +=	./sources/parser_ast/lib_lexer/is_redirection.c
+SRC +=	./sources/parser_ast/lib_lexer/my_ispipe.c
+SRC +=	./sources/parser_ast/parser.c
+SRC +=	./sources/parser_ast/utils/pipe_utils.c
+SRC +=	./sources/parser_ast/utils/root_utils.c
+SRC +=	./sources/parser_ast/utils/semicol_utils.c
+SRC +=	./sources/parser_ast/utils/and_utils.c
+SRC +=	./sources/parser_ast/utils/or_utils.c
+SRC +=	./sources/parser_ast/utils/redirect_utils.c
+SRC +=  ./sources/parser_ast/utils/handle_double_quote.c
+SRC +=  ./sources/parser_ast/utils/handle_single_quote.c
+SRC +=  ./sources/parser_ast/utils/handle_parenthese.c
+SRC +=  ./sources/parser_ast/utils/handle_operator.c
+SRC +=	./sources/parser_ast/memory_management_parser/free_parser_lexer.c
+SRC +=	./sources/parser_ast/memory_management_parser/init_parser_struct.c
 
 T_SRC	:=	$(SRC)
 T_SRC	+=	./tests/my_tests.c
@@ -57,11 +82,11 @@ T_OBJ	=	$(T_SRC:%.c=$(T_BDIR)/%.o)
 
 all:	$(NAME)
 
-$(NAME):	build_lib $(OBJ)
-	$(CC) $(OBJ) $(CFLAGS) -o $(NAME) $(LIBS_FLAGS)
+$(NAME):	$(OBJ)
+	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
 
-$(T_NAME):	fclean build_lib $(T_OBJ)
-	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME) $(LIBS_FLAGS)
+$(T_NAME):	fclean $(T_OBJ)
+	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME)
 
 $(T_BDIR)/%.o:	%.c
 	@ mkdir -p $(dir $@)
@@ -85,9 +110,6 @@ tests_run_pp:	$(T_NAME)
 	@ mkdir -p $(GCOVR_OUTPUT)
 	@ gcovr --exclude=tests --html-details $(GCOVR_OUTPUT)/output.html
 
-build_lib:
-	@ make -C ./lib/my/
-
 clean:
 	@ rm -f $(T_OBJ)
 	@ rm -f $(OBJ)
@@ -100,7 +122,6 @@ fclean:	clean
 	@ rm -f $(T_NAME)
 	@ rm -f $(SEGFAULT_NAME)
 	@ rm -f $(FP_EXECP_NAME)
-	@ make -C ./lib/my/ fclean
 
 re:	fclean all
 
@@ -110,5 +131,5 @@ segfault:
 floating:
 	$(CC) bonus/fp_exception.c -o $(FP_EXECP_NAME)
 
-.PHONY : all asan tests_run_pp tests_run build_lib clean fclean re segfault
-.PHONY : floating debug
+.PHONY : all asan tests_run_pp tests_run clean fclean re segfault floating
+.PHONY : debug
