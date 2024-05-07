@@ -195,7 +195,7 @@ int present_prompt(shell_t *shell)
 {
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
-    shell->prompt->input = NULL;
+    shell->prompt->input = calloc(1, sizeof(char));
     shell->prompt->cursor_pos = 0;
     shell->prompt->len = 0;
     shell->prompt->ch = 0;
