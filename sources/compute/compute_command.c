@@ -11,7 +11,6 @@
 #include <stdio.h>
 
 #include "minishell.h"
-#include "alias.h"
 #include "utils.h"
 #include "builtins.h"
 #include "path_explorer.h"
@@ -77,7 +76,7 @@ void child_process(commands_t *cmd)
     print_error_with_input(cmd->argv[0]);
     exit(1);
 }
-    
+
 static
 int launch_binary(commands_t *cmd)
 {
