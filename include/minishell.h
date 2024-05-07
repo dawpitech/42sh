@@ -116,6 +116,7 @@ pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
 root_t *init_root(void);
 void free_parser(root_t *root);
+void free_tab(char **tab);
 and_t *init_and(void);
 or_t *init_or(void);
 
@@ -148,6 +149,9 @@ int compute_and(and_t *and_obj);
 int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
+
+// GLOBBINGS
+char **handle_globbings(commands_t *cmd);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);

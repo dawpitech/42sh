@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <stdio.h>
+#include <glob.h>
 
 #include "minishell.h"
 #include "utils.h"
@@ -128,6 +129,8 @@ int compute_cmd(commands_t *cmd)
     return_value = search_and_run_builtins(cmd);
     if (return_value != NO_CMD_FOUND)
         return return_value;
+    if (handle_globbings(cmd) == NULL)
+        return 1;
     if (!strstr(cmd->argv[0], "/") && resolve_path(cmd)
         == NO_CMD_FOUND) {
             cmd->shell->cmds_valid = false;

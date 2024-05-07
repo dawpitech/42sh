@@ -10,7 +10,6 @@
 #include "minishell.h"
 #include "lexer_ast.h"
 
-static
 void free_tab(char **tab)
 {
     for (int i = 0; tab[i] != NULL; i ++)
