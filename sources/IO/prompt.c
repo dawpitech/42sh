@@ -87,6 +87,7 @@ void print_prompt(shell_t *shell)
     }
     printf("❯ ");
     free(current_dir);
+    fflush(stdout);
 }
 
 static
