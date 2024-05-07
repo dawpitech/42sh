@@ -24,6 +24,7 @@ static const builtin_t builtins_list[] = {
     {.cmd = "history", .fptr = execute_history},
     {.cmd = "!", .fptr = execute_search_history},
     {.cmd = "alias", .fptr = alias_handler},
+    {.cmd = "unalias", .fptr = unalias},
     {.cmd = NULL, .fptr = NULL},
 };
 #endif //MINISHELL_BUILTINS_H

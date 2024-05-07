@@ -15,6 +15,8 @@ typedef struct alias_s {
     char *cmd;
 } alias_t;
 
+void compare_alias(alias_t **alias, commands_t *cmd);
+int unalias(shell_t *shell, int argc, char **argv);
 int handle_realoc(shell_t *shell, char **argv);
 void print_alias(alias_t **aliases);
 int count_aliases(alias_t **aliases);

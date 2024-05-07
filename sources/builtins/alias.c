@@ -28,7 +28,7 @@ void print_alias(alias_t **aliases)
     int i = 0;
 
     if (aliases == NULL){
-        return -1;
+        return;
     } else {
         while (aliases[i] != NULL) {
             printf("%s", aliases[i]->alias);
@@ -52,6 +52,27 @@ int handle_null(shell_t *shell, char **argv)
     return EXIT_SUCCESS_TECH;
 }
 
+static int unalias_handle(shell_t *shell, char **argv)
+{
+    int i = 0;
+    int j = 0;
+
+    while (shell->aliases[i] != NULL) {
+        if (strcmp(shell->aliases[i]->alias, argv[1]) == 0) {
+            free(shell->aliases[i]->alias);
+            free(shell->aliases[i]->cmd);
+            free(shell->aliases[i]);
+            for (j = i; shell->aliases[j] != NULL; j++) {
+                shell->aliases[j] = shell->aliases[j + 1];
+            }
+            return EXIT_SUCCESS_TECH;
+        }
+        i++;
+    }
+    my_put_stderr("unalias: No such alias.\n");
+    return EXIT_FAILURE_TECH;
+}
+
 int handle_realoc(shell_t *shell, char **argv)
 {
     int i = 0;
@@ -67,6 +88,16 @@ int handle_realoc(shell_t *shell, char **argv)
     shell->aliases[i]->alias = strdup(argv[1]);
     shell->aliases[i]->cmd = strdup(argv[2]);
     shell->aliases[i + 1] = NULL;
+    return EXIT_SUCCESS_TECH;
+}
+
+int unalias(shell_t *shell, int argc, char **argv)
+{
+    if (argc == 1) {
+        my_put_stderr("unalias: Too few arguments.\n");
+        return EXIT_FAILURE_TECH;
+    }
+    unalias_handle(shell, argv);
     return EXIT_SUCCESS_TECH;
 }
 

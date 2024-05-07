@@ -8,7 +8,9 @@
 #ifndef MINISHELL_BUILTINS_CMD_H
     #define MINISHELL_BUILTINS_CMD_H
     #include "minishell.h"
+    
 int alias_handler(shell_t *shell, int argc, char **argv);
+int unalias(shell_t *shell, int argc, char **argv);
 int execute_cd(shell_t *shell, __attribute__((unused)) int argc, char **argv);
 int execute_exit(shell_t *shell, __attribute__((unused)) int argc,
     __attribute__((unused)) char **argv);
