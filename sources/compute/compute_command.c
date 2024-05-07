@@ -63,6 +63,13 @@ void child_process(commands_t *cmd)
 {
     char **env = get_env_array(cmd->shell);
 
+    setpgid(0, 0);
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
+    signal(SIGTSTP, SIG_DFL);
+    signal(SIGTTIN, SIG_DFL);
+    signal(SIGTTOU, SIG_DFL);
+    signal(SIGCHLD, SIG_DFL);
     if (cmd->fd_in != STDIN_FILENO) {
         dup2(cmd->fd_in, STDIN_FILENO);
         close(cmd->fd_in);
@@ -82,11 +89,16 @@ int handle_detached_process(commands_t *cmd, pid_t pid)
 {
     jobs_t *job = new_job(cmd->shell);
 
-    job->cmd = cmd;
+    job->argc = cmd->argc;
+    job->argv = malloc(sizeof(char *) * (cmd->argc + 1));
+    job->argv[0] = strdup(cmd->exec_name);
+    for (int i = 1; i < cmd->argc; i++)
+        job->argv[i] = strdup(cmd->argv[i]);
+    job->argv[cmd->argc] = NULL;
     job->pid = pid;
     job->is_running = true;
     job->state = BACKGROUND;
-    printf("[1] %d\n", pid);
+    printf("[%d] %d\n", job->id,pid);
     return RET_VALID;
 }
 
@@ -95,20 +107,33 @@ int launch_binary(commands_t *cmd)
 {
     pid_t pid;
     int child_status;
+    int ab;
 
     pid = fork();
-    if (pid == 0)
+    if (pid == 0) {
         child_process(cmd);
-    if (cmd->fd_in != STDIN_FILENO)
-        close(cmd->fd_in);
-    if (cmd->fd_out != STDOUT_FILENO) {
-        close(cmd->fd_out);
-        return CMD_IS_A_PIPE;
+        exit(61);
+    } else {
+        printf("PID: %d\n", pid);
+        setpgid(pid, pid);
+        tcsetpgrp(STDIN_FILENO, pid);
+        if (cmd->fd_in != STDIN_FILENO)
+            close(cmd->fd_in);
+        if (cmd->fd_out != STDOUT_FILENO) {
+            close(cmd->fd_out);
+            return CMD_IS_A_PIPE;
+        }
+        if (cmd->job_control)
+            return handle_detached_process(cmd, pid);
+        printf("waiting for pid: %d\n", pid);
+        ab = waitpid(-pid, &child_status, WUNTRACED);
+        printf("%d\n", ab);
+        signal(SIGTTOU, SIG_IGN);
+        printf("alice\n");
+        tcsetpgrp(STDIN_FILENO, getpid());
+        printf("bob\n");
+        return compute_return_code(child_status);
     }
-    if (cmd->job_control)
-        return handle_detached_process(cmd, pid);
-    waitpid(pid, &child_status, 0);
-    return compute_return_code(child_status);
 }
 
 static

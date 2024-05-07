@@ -8,7 +8,15 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
+
 #include "minishell.h"
+
+shell_t *get_unique_shell(void)
+{
+    static shell_t shell = {0};
+
+    return &shell;
+}
 
 static
 int initialize_shell(shell_t *shell, char **env)
@@ -43,40 +51,69 @@ void exiting_hook(shell_t *shell)
     history_free(shell);
 }
 
-void handle_ctrl_c(int signal)
+static
+void print_done_job(jobs_t *job)
 {
-    (void) signal;
-    printf("%s", "\n\033[34m?\033[39m> ");
+    printf("[%d]\tDone\t\t\t\t", job->id);
+    for (int j = 0; j < job->argc; j++) {
+        if (j != 0)
+            printf(" ");
+        printf("%s", job->argv[j]);
+    }
+    printf("\n");
 }
 
-void handle_ctrl_z(int signal)
+static
+void handle_child_proc(shell_t *shell)
 {
-    (void) signal;
-    printf("\a");
+    for (int i = 0; i < MAX_JOBS; i++) {
+        if (shell->process[i] != NULL && shell->process[i]->state == DONE) {
+            print_done_job(shell->process[i]);
+            free(shell->process[i]->argv);
+            free(shell->process[i]);
+            shell->process[i] = NULL;
+        }
+    }
+}
+
+static
+void input_loop(shell_t *shell)
+{
+    if (present_prompt(shell) == RET_ERROR) {
+        shell->running = false;
+        return;
+    }
+    shell->root = parse_input(shell->prompt->raw_input, shell);
+    if (shell->root == NULL) {
+        shell->cmds_valid = false;
+        shell->last_exit_code = 1;
+    }
+    if (shell->cmds_valid)
+        shell->last_exit_code = compute_root(shell->root);
+    history_add(shell, shell->prompt->raw_input);
+    free_parser(shell->root);
+    handle_child_proc(shell);
 }
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env)
 {
-    shell_t shell = {0};
+    shell_t *shell = get_unique_shell();
 
-    signal(SIGINT, handle_ctrl_c);
-    signal(SIGTSTP, handle_ctrl_z);
-    if (initialize_shell(&shell, env) != EXIT_SUCCESS_TECH)
+    signal(SIGINT, SIG_IGN);
+    signal(SIGCONT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGCHLD, SIG_DFL);
+    //signal(SIGCHLD, handle_sig_child);
+    setpgid(0, 0);
+    tcsetpgrp(STDIN_FILENO, getpgid(getpid()));
+    if (initialize_shell(shell, env) != EXIT_SUCCESS_TECH)
         return EXIT_FAILURE_TECH;
-    while (shell.running) {
-        if (present_prompt(&shell) == RET_ERROR)
-            break;
-        shell.root = parse_input(shell.prompt->raw_input, &shell);
-        if (shell.root == NULL) {
-            shell.cmds_valid = false;
-            shell.last_exit_code = 1;
-        }
-        if (shell.cmds_valid)
-            shell.last_exit_code = compute_root(shell.root);
-        history_add(&shell, shell.prompt->raw_input);
-        free_parser(shell.root);
-    }
-    exiting_hook(&shell);
-    return shell.running ? EXIT_FAILURE_TECH : shell.last_exit_code;
+    while (shell->running)
+        input_loop(shell);
+    //exiting_hook(shell);
+    return shell->running ? EXIT_FAILURE_TECH : shell->last_exit_code;
 }

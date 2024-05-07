@@ -93,13 +93,15 @@ typedef struct {
 
 typedef struct {
     unsigned int id;
-    commands_t *cmd;
+    int argc;
+    char **argv;
     pid_t pid;
     bool is_running;
     enum {
         FOREGROUND,
         BACKGROUND,
         SUSPENDED,
+        DONE,
     } state;
 } jobs_t;
 
@@ -166,6 +168,7 @@ int compute_cmd(commands_t *cmd);
 
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
+jobs_t *get_job_from_pid(shell_t *shell, int pid);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);
@@ -179,8 +182,9 @@ int add_env_var(shell_t *context, char *key, char *value);
 int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
-void handle_ctrl_c(int signal);
-void handle_ctrl_z(int signal);
+void handle_ctrl_c(__attribute__((unused)) int signal);
+void handle_ctrl_z(__attribute__((unused)) int signal);
+void handle_sig_child(int signal);
 void history_add(shell_t *shell, char const *line);
 history_entry_t *history_get(shell_t *shell, int index);
 int write_hist(shell_t *shell);
@@ -188,4 +192,5 @@ int load_history(shell_t *shell);
 void history_free(shell_t *shell);
 list_t *lexer(char *raw_input, list_t *list);
 int parser_of_lexer(shell_t *mysh);
+shell_t *get_unique_shell(void);
 #endif //MINISHELL_MINISHELL_H
