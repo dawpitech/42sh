@@ -78,11 +78,11 @@ void print_prompt(shell_t *shell)
     if (!shell->isatty)
         return;
     printf("%s%s➜ %s%s%s ", AC_BOLD, color, AC_C_BRIGHT_BLUE, current_dir,
-        AC_RESET);
+            AC_RESET);
     if (is_git_repo()) {
         branch_name = get_git_branch();
         printf("on %s%s%s %s %s", AC_C_MAGENTA, AC_BOLD, "", branch_name,
-            AC_RESET);
+                AC_RESET);
         free(branch_name);
     }
     printf("❯ ");
@@ -117,7 +117,7 @@ void remove_char(shell_t *shell)
         print_prompt(shell);
         write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
         for (int i = 0; i <
-        (int)shell->prompt->len - shell->prompt->cursor_pos; i += 1)
+                (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
             write(STDOUT_FILENO, "\033[D", 3);
         shell->prompt->cursor_pos -= 1;
         shell->prompt->cursor_pos = shell->prompt->cursor_pos;
@@ -141,7 +141,7 @@ void add_char(shell_t *shell)
     print_prompt(shell);
     write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
     for (int i = 0;
-    i < (int)shell->prompt->len - shell->prompt->cursor_pos; i += 1)
+            i < (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
         write(STDOUT_FILENO, "\033[D", 3);
 }
 
