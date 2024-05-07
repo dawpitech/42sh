@@ -17,6 +17,7 @@ CFLAGS	+=	-Wmissing-prototypes
 CFLAGS	+=	-Wno-unknown-pragmas
 CFLAGS	+=	-pedantic -g3
 CFLAGS	+=	-I./include/
+CFLAGS	+=	-MMD -MP
 
 T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
@@ -47,6 +48,7 @@ SRC	+=	./sources/compute/compute_or.c
 SRC	+=	./sources/compute/compute_pipe.c
 SRC	+=	./sources/compute/compute_command.c
 SRC	+=	./sources/jobs_control/jobs_manager.c
+SRC	+=	./sources/sig_handlers/handlers.c
 SRC +=	./sources/parser_ast/lexer.c
 SRC +=	./sources/parser_ast/backtrack_lexer.c
 SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c
@@ -79,14 +81,21 @@ SRC	+=	./main.c
 GCOVR_OUTPUT = gcovr
 
 OBJ	=	$(SRC:%.c=$(BDIR)/%.o)
+DEPS	=	$(OBJ:%.o=%.d)
+
 T_OBJ	=	$(T_SRC:%.c=$(T_BDIR)/%.o)
+T_DEPS	=	$(T_OBJ:%.o=%.d)
 
 all:	$(NAME)
+
+-include $(DEPS)
+-include $(T_DEPS)
 
 $(NAME):	$(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
 
-$(T_NAME):	fclean $(T_OBJ)
+.NOTPARALLEL: $(T_NAME)
+$(T_NAME):	$(T_OBJ)
 	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME)
 
 $(T_BDIR)/%.o:	%.c
@@ -124,6 +133,7 @@ fclean:	clean
 	@ rm -f $(SEGFAULT_NAME)
 	@ rm -f $(FP_EXECP_NAME)
 
+.NOTPARALLEL: re
 re:	fclean all
 
 segfault:
