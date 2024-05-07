@@ -54,7 +54,6 @@ char *search_bin(shell_t *shell, commands_t *cmd)
     char *result = strtok(path, ":");
     char *rt;
 
-    compare_alias(shell->aliases, cmd);
     while (result != NULL) {
         if (find_bin_in_dir(cmd->argv[0], result) == RET_VALID) {
             rt = strdup(result);

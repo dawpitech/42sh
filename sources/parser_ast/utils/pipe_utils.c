@@ -60,6 +60,7 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
     c->exec_name = handle_operator(token);
     c->argv = malloc(sizeof(char *) * 2);
     c->argv[0] = strdup(c->exec_name);
+    compare_alias(shell->aliases, c);
     c->argv[1] = NULL;
     c->argc = 1;
     c->fd_in = STDIN_FILENO;
