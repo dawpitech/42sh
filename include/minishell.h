@@ -45,6 +45,10 @@ typedef struct {
     sh_command_t *commands;
     int nb_commands;
     char *raw_input;
+    char *input;
+    int cursor_pos;
+    size_t len;
+    char ch;
 } prompt_t;
 typedef struct {
     prompt_t *prompt;

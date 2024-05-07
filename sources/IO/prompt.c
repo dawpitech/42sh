@@ -27,93 +27,119 @@ void print_prompt(shell_t *shell)
 }
 
 static
-char *get_from_stdin(int *cursor_pos, shell_t *shell)
+struct termios init_termios(void)
 {
     struct termios old_config;
     struct termios new_config;
-    int c = 0;
-    size_t len = 0;
-    char *input = NULL;
 
-    input = calloc(1, sizeof(char) * 4096);
     tcgetattr(STDIN_FILENO, &old_config);
     new_config = old_config;
     new_config.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
-    do {
-        c = getchar();
-        if (c == '\n')
-            break;
-        if (c == 127) {
-            if (strlen(input) > 0) {
-                memmove(&input[*cursor_pos - 1], &input[*cursor_pos],
-                        strlen(input) - *cursor_pos + 1);
-                write(STDOUT_FILENO, "\033[2K", 4);
-                write(STDOUT_FILENO, "\r", 1);
-                print_prompt(shell);
-                write(STDOUT_FILENO, input, len);
-                for (int i = 0; i < (int)len - *cursor_pos; i += 1)
-                    write(STDOUT_FILENO, "\033[D", 3);
-                *cursor_pos -= 1;
-                len -= 1;
-            }
-            continue;
-        }
-        if (c == 27) {
-            (void)!getchar();
-            c = getchar();
-            switch (c) {
-                case 'D':
-                    if (*cursor_pos <= 0)
-                        break;
-                    write(STDOUT_FILENO, "\033[D", 3);
-                    *cursor_pos -= 1;
-                    break;
-                case 'C':
-                    if (*cursor_pos >= (int)strlen(input))
-                        break;
-                    write(STDOUT_FILENO, "\033[C", 3);
-                    *cursor_pos += 1;
-                    break;
-                default:
-                    break;
-            }
-            continue;
-        }
-        input = realloc(input, len + 2);
-        memmove(&input[*cursor_pos + 1], &input[*cursor_pos],
-                len - *cursor_pos);
-        input[*cursor_pos] = (char)c;
-        len += 1;
-        *cursor_pos += 1;
+    return old_config;
+}
+
+static
+void remove_char(shell_t *shell)
+{
+    if (strlen(shell->prompt->input) > 0) {
+        memmove(&shell->prompt->input[shell->prompt->cursor_pos - 1],
+                &shell->prompt->input[shell->prompt->cursor_pos],
+                strlen(shell->prompt->input) - shell->prompt->cursor_pos + 1);
         write(STDOUT_FILENO, "\033[2K", 4);
         write(STDOUT_FILENO, "\r", 1);
         print_prompt(shell);
-        write(STDOUT_FILENO, input, len);
-        for (int i = 0; i < (int)len - *cursor_pos; i += 1)
+        write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
+        for (int i = 0; i <
+        (int)shell->prompt->len - shell->prompt->cursor_pos; i += 1)
             write(STDOUT_FILENO, "\033[D", 3);
+        shell->prompt->cursor_pos -= 1;
+        shell->prompt->cursor_pos = shell->prompt->cursor_pos;
+        shell->prompt->len -= 1;
+    }
+}
+
+static
+void add_char(shell_t *shell)
+{
+    shell->prompt->input = realloc(shell->prompt->input,
+            shell->prompt->len + 2);
+    memmove(&shell->prompt->input[shell->prompt->cursor_pos + 1],
+            &shell->prompt->input[shell->prompt->cursor_pos],
+            shell->prompt->len - shell->prompt->cursor_pos);
+    shell->prompt->input[shell->prompt->cursor_pos] = shell->prompt->ch;
+    shell->prompt->len += 1;
+    shell->prompt->cursor_pos += 1;
+    write(STDOUT_FILENO, "\033[2K", 4);
+    write(STDOUT_FILENO, "\r", 1);
+    print_prompt(shell);
+    write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
+    for (int i = 0;
+    i < (int)shell->prompt->len - shell->prompt->cursor_pos; i += 1)
+        write(STDOUT_FILENO, "\033[D", 3);
+}
+
+static
+void handle_arrow_keys(shell_t *shell)
+{
+    (void)!getchar();
+    shell->prompt->ch = (char)getchar();
+    switch (shell->prompt->ch) {
+        case 'D':
+            if (shell->prompt->cursor_pos <= 0)
+                break;
+            write(STDOUT_FILENO, "\033[D", 3);
+            shell->prompt->cursor_pos -= 1;
+            break;
+        case 'C':
+            if (shell->prompt->cursor_pos >= (int)strlen(shell->prompt->input))
+                break;
+            write(STDOUT_FILENO, "\033[C", 3);
+            shell->prompt->cursor_pos += 1;
+            break;
+        default:
+            break;
+    }
+}
+
+static
+char *get_from_stdin(shell_t *shell)
+{
+    struct termios old_config = init_termios();
+
+    do {
+        shell->prompt->ch = (char)getchar();
+        if (shell->prompt->ch == '\n')
+            break;
+        if (shell->prompt->ch == 127) {
+            remove_char(shell);
+            continue;
+        }
+        if (shell->prompt->ch == 27) {
+            handle_arrow_keys(shell);
+            continue;
+        }
+        add_char(shell);
     } while (1);
     tcsetattr(STDIN_FILENO, TCSANOW, &old_config);
     printf("\n");
-    return input;
+    return shell->prompt->input;
 }
 
 int present_prompt(shell_t *shell)
 {
-    int cursor_pos = 0;
-
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
     shell->prompt->commands = malloc(sizeof(sh_command_t));
     shell->prompt->nb_commands = 0;
+    shell->prompt->input = NULL;
+    shell->prompt->cursor_pos = 0;
+    shell->prompt->len = 0;
+    shell->prompt->ch = 0;
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);
-    shell->prompt->raw_input = get_from_stdin(&cursor_pos, shell);
-//    if (shell->prompt->raw_input != NULL) {
-//            free(shell->prompt->raw_input);
-//            shell->prompt->raw_input = NULL;
-//    }
+    shell->prompt->raw_input = get_from_stdin(shell);
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     shell->running = false;
