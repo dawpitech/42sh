@@ -175,9 +175,8 @@ char *get_from_stdin(shell_t *shell)
     struct termios old_config = init_termios();
 
     do {
-        shell->prompt->ch = (char)getchar();
-        if (shell->prompt->ch == '\n')
         shell->prompt->ch = (char) getchar();
+        if (shell->prompt->ch == '\n' || shell->prompt->ch == 4)
             break;
         if (shell->prompt->ch == 127) {
             remove_char(shell);
