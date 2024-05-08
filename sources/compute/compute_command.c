@@ -46,10 +46,10 @@ int search_and_run_builtins(commands_t *cmd)
 }
 
 static
-int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
+int handle_if_stopped(commands_t *cmd, pid_t pid, int child_status)
 {
-    if (WIFSTOPPED(child_status)) {
-        printf("\nSuspended\n");
+    printf("\nSuspended\n");
+    if (cmd != NULL) {
         jobs_t *job = new_job(cmd->shell);
         job->state = SUSPENDED;
         job->pid = pid;
@@ -59,6 +59,21 @@ int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
         job->argv[0] = strdup(cmd->exec_name);
         for (int i = 1; i < cmd->argc; i++)
             job->argv[i] = strdup(cmd->argv[i]);
+    }
+    return WEXITSTATUS(child_status);
+}
+
+static
+int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
+{
+    if (WIFSTOPPED(child_status))
+        return handle_if_stopped(cmd, pid, child_status);
+    if (WIFEXITED(child_status)) {
+        jobs_t *job = get_job_from_pid(get_unique_shell(), pid);
+        if (job != NULL) {
+            job->state = DONE;
+            remove_job(&job, false);
+        }
     }
     if (WIFSIGNALED(child_status)) {
         my_put_stderr(strsignal(WTERMSIG(child_status)));
@@ -114,34 +129,37 @@ int handle_detached_process(commands_t *cmd, pid_t pid)
     return RET_VALID;
 }
 
+int wait_after_launch_process(pid_t pid, commands_t *cmd)
+{
+    int child_status;
+
+    waitpid(-pid, &child_status, WUNTRACED);
+    signal(SIGTTOU, SIG_IGN);
+    tcsetpgrp(STDIN_FILENO, getpid());
+    return compute_return_code(cmd, pid, child_status);
+}
+
 static
 int launch_binary(commands_t *cmd)
 {
     pid_t pid;
-    int child_status;
 
     pid = fork();
-    if (pid == 0) {
+    if (pid == 0)
         child_process(cmd);
-        exit(61);
-    } else {
-        if (!cmd->job_control) {
-            setpgid(pid, pid);
-            tcsetpgrp(STDIN_FILENO, pid);
-        }
-        if (cmd->fd_in != STDIN_FILENO)
-            close(cmd->fd_in);
-        if (cmd->fd_out != STDOUT_FILENO) {
-            close(cmd->fd_out);
-            return CMD_IS_A_PIPE;
-        }
-        if (cmd->job_control)
-            return handle_detached_process(cmd, pid);
-        waitpid(-pid, &child_status, WUNTRACED);
-        signal(SIGTTOU, SIG_IGN);
-        tcsetpgrp(STDIN_FILENO, getpid());
-        return compute_return_code(cmd, pid, child_status);
+    if (!cmd->job_control) {
+        setpgid(pid, pid);
+        tcsetpgrp(STDIN_FILENO, pid);
     }
+    if (cmd->fd_in != STDIN_FILENO)
+        close(cmd->fd_in);
+    if (cmd->fd_out != STDOUT_FILENO) {
+        close(cmd->fd_out);
+        return CMD_IS_A_PIPE;
+    }
+    if (cmd->job_control)
+        return handle_detached_process(cmd, pid);
+    return wait_after_launch_process(pid, cmd);
 }
 
 static

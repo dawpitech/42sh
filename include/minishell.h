@@ -102,6 +102,7 @@ typedef struct {
         RUNNING,
         CONTINUED,
         SUSPENDED,
+        KILLED,
         DONE,
     } state;
 } jobs_t;
@@ -119,6 +120,7 @@ typedef struct shell_s {
     bool running;
     bool cmds_valid;
     bool isatty;
+    bool multiple_exit;
     char *current_path;
     char *last_path;
     int last_exit_code;
@@ -167,11 +169,15 @@ int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
 
+int wait_after_launch_process(pid_t pid, commands_t *cmd);
+
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
 jobs_t *get_job_from_pid(shell_t *shell, int pid);
 void print_job(jobs_t *job, bool extended_infos, bool show_priority);
 void update_childs(shell_t *shell);
+int put_job_to_foreground(jobs_t *job);
+void remove_job(jobs_t **job, bool should_print);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);

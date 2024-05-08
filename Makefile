@@ -106,7 +106,7 @@ $(BDIR)/%.o:	%.c
 	@ mkdir -p $(dir $@)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-asan:	CFLAGS += -fsanitize=address,leak,undefined -g3
+asan:	CFLAGS += -fsanitize=address,leak,undefined -g3 -fno-omit-frame-pointer
 asan: re
 
 debug:	CFLAGS	+=	-g3

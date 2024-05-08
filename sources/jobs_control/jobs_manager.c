@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "minishell.h"
 
@@ -14,10 +16,16 @@ static
 char *get_state_as_str(int state)
 {
     switch (state) {
+        case RUNNING:
+            return "Running";
         case SUSPENDED:
             return "Suspended";
+        case CONTINUED:
+            return "Continued";
         case DONE:
             return "Done";
+        case KILLED:
+            return "Killed";
         default:
             return "NOT IMPLEMENTED";
     }
@@ -31,7 +39,10 @@ void update_job_status(jobs_t *job, int status)
         return;
     }
     if (WIFSIGNALED(status)) {
-        job->state = CONTINUED;
+        if (WTERMSIG(status) == SIGCONT)
+            job->state = CONTINUED;
+        if (WTERMSIG(status) == SIGKILL)
+            job->state = KILLED;
         return;
     }
     if (WIFEXITED(status)) {
@@ -41,23 +52,18 @@ void update_job_status(jobs_t *job, int status)
 }
 
 static
-void lookup_child(shell_t *shell, jobs_t **job)
+void lookup_child(jobs_t **job)
 {
     int child_status;
+    int rt = waitpid((*job)->pid, &child_status, WNOHANG | WUNTRACED | WCONTINUED);
 
-    waitpid((*job)->pid, &child_status, WNOHANG | WUNTRACED | WCONTINUED);
-    if (child_status <= 0)
-        return;
-    update_job_status(*job, child_status);
-    if ((*job)->state == DONE) {
-        print_job(*job, false, false);
-        for (int i = 0; i < (*job)->argc; i++)
-            free((*job)->argv[i]);
-        free((*job)->argv);
-        free(*job);
-        *job = NULL;
-        return;
-    }
+    //printf("Waitpid reported %d for process %d and return value is %d\n", child_status, (*job)->pid, rt);
+    if (rt == (*job)->pid)
+        (*job)->state = DONE;
+    if (child_status > 0)
+        update_job_status(*job, child_status);
+    if ((*job)->state == DONE)
+        remove_job(job, true);
 }
 
 static
@@ -80,7 +86,7 @@ void update_childs(shell_t *shell)
 {
     for (int i = 0; i < MAX_JOBS; i++)
         if (shell->process[i] != NULL)
-            lookup_child(shell, &shell->process[i]);
+            lookup_child(&shell->process[i]);
     update_job_priorities(shell);
 }
 
@@ -92,7 +98,7 @@ void print_job(jobs_t *job, bool extended_infos, bool show_priority)
         return;
     priority = (show_priority) ? job->priority : ' ';
     if (extended_infos) {
-        printf("[%d]  %c %d\t%s\t\t\t\t", job->id, job->pid, priority,
+        printf("[%d]  %c   %d\t%s\t\t\t\t", job->id, priority, job->pid,
                get_state_as_str(job->state));
     } else {
         printf("[%d]  %c %s\t\t\t\t", job->id, priority,
@@ -106,11 +112,29 @@ void print_job(jobs_t *job, bool extended_infos, bool show_priority)
     printf("\n");
 }
 
+void remove_job(jobs_t **job, bool should_print)
+{
+    int id;
+
+    if (*job == NULL)
+        return;
+    if (should_print)
+        print_job(*job, false, false);
+    id = (int) (*job)->id;
+    for (int i = 0; i < (*job)->argc; i++)
+        free((*job)->argv[i]);
+    free((*job)->argv);
+    free(*job);
+    get_unique_shell()->process[id - 1] = NULL;
+}
+
 int put_job_to_foreground(jobs_t *job)
 {
     if (job->state == DONE)
         return RET_ERROR;
-
+    tcsetpgrp(STDIN_FILENO, job->pid);
+    kill(job->pid, SIGCONT);
+    return wait_after_launch_process(job->pid, NULL);
 }
 
 jobs_t *new_job(shell_t *shell)
