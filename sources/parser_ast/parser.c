@@ -26,7 +26,8 @@ or_t *parser_or(token_t **token, shell_t *shell)
 {
     or_t *new = NULL;
 
-    if ((*token)->type != IDENTIFIER && (*token)->type != OPERATOR)
+    if ((*token)->type != IDENTIFIER && (*token)->type != OPERATOR
+        && (*token)->type != AND && (*token)->type != L_PAREN)
         return NULL;
     new = init_or();
     new = loop_or(new, token, shell);
@@ -38,7 +39,8 @@ and_t *parser_and(token_t **token, shell_t *shell)
     and_t *new = NULL;
 
     if ((*token)->type != IDENTIFIER && ((*token)->type) != AND &&
-        (*token)->type != OPERATOR && (*token)->type != D_AND) {
+        (*token)->type != OPERATOR && (*token)->type != D_AND
+        && (*token)->type != L_PAREN) {
         return NULL;
     }
     new = init_and();
@@ -51,7 +53,8 @@ semicol_t *parser_semicol(token_t **token, shell_t *shell)
     semicol_t *new = NULL;
 
     if ((*token)->type != IDENTIFIER && ((*token)->type) != AND
-        && (*token)->type != D_AND && (*token)->type != OPERATOR) {
+        && (*token)->type != D_AND && (*token)->type != OPERATOR
+        && (*token)->type != L_PAREN) {
         return NULL;
     }
     new = init_semicol();

@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "minishell.h"
 #include "ansi_chars.h"
@@ -95,8 +96,9 @@ char *get_from_stdin(void)
     size_t buff_value = 0;
     int rt_value;
 
+    errno = 0;
     rt_value = (int) getline(&line, &buff_value, stdin);
-    if (rt_value <= 0) {
+    if (rt_value <= 0 && errno != 4) {
         printf("exit\n");
         free(line);
         return NULL;
