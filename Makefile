@@ -18,6 +18,7 @@ CFLAGS	+=	-Wno-unknown-pragmas
 CFLAGS	+=	-pedantic -g3
 CFLAGS	+=	-I./include/
 CFLAGS	+=	-MMD -MP
+CFLAGS	+=	-Wno-stringop-overflow
 
 T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
@@ -32,6 +33,7 @@ SEGFAULT_NAME	=	segfault.bin
 FP_EXECP_NAME	=	floating.bin
 
 SRC = ./sources/minishell.c
+SRC	+=	./sources/builtins/run_builtins.c
 SRC	+=	./sources/builtins/builtins_cmd.c
 SRC	+=	./sources/builtins/builtins_history.c
 SRC	+=	./sources/builtins/builtins_search_history.c
@@ -49,6 +51,7 @@ SRC	+=	./sources/compute/compute_or.c
 SRC	+=	./sources/compute/compute_pipe.c
 SRC	+=	./sources/compute/compute_command.c
 SRC	+=	./sources/jobs_control/jobs_manager.c
+SRC	+=	./sources/jobs_control/jobs_destroyer.c
 SRC +=	./sources/parser_ast/lexer.c
 SRC +=	./sources/parser_ast/backtrack_lexer.c
 SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c

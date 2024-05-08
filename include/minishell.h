@@ -202,4 +202,5 @@ void history_free(shell_t *shell);
 list_t *lexer(char *raw_input, list_t *list);
 int parser_of_lexer(shell_t *mysh);
 shell_t *get_unique_shell(void);
+int search_and_run_builtins(commands_t *cmd);
 #endif //MINISHELL_MINISHELL_H

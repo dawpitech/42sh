@@ -89,6 +89,6 @@ int minishell(__attribute__((unused)) int argc,
         return EXIT_FAILURE_TECH;
     while (shell->running)
         input_loop(shell);
-    //exiting_hook(shell);
+    exiting_hook(shell);
     return shell->running ? EXIT_FAILURE_TECH : shell->last_exit_code;
 }

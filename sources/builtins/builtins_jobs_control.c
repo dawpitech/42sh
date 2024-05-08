@@ -45,7 +45,6 @@ int execute_fg(shell_t *shell, int argc, __attribute__((unused)) char **argv)
 
     if (argc == 1) {
         job = get_last_job(shell);
-
         if (job == NULL) {
             my_put_stderr("fg: No current job.\n");
             return EXIT_FAILURE_TECH;

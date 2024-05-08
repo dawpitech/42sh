@@ -55,9 +55,9 @@ static
 void lookup_child(jobs_t **job)
 {
     int child_status;
-    int rt = waitpid((*job)->pid, &child_status, WNOHANG | WUNTRACED | WCONTINUED);
+    int rt = waitpid((*job)->pid, &child_status,
+        WNOHANG | WUNTRACED | WCONTINUED);
 
-    //printf("Waitpid reported %d for process %d and return value is %d\n", child_status, (*job)->pid, rt);
     if (rt == (*job)->pid)
         (*job)->state = DONE;
     if (child_status > 0)
@@ -99,10 +99,10 @@ void print_job(jobs_t *job, bool extended_infos, bool show_priority)
     priority = (show_priority) ? job->priority : ' ';
     if (extended_infos) {
         printf("[%d]  %c   %d\t%s\t\t\t\t", job->id, priority, job->pid,
-               get_state_as_str(job->state));
+            get_state_as_str(job->state));
     } else {
         printf("[%d]  %c %s\t\t\t\t", job->id, priority,
-               get_state_as_str(job->state));
+            get_state_as_str(job->state));
     }
     for (int j = 0; j < job->argc; j++) {
         if (j != 0)
@@ -110,22 +110,6 @@ void print_job(jobs_t *job, bool extended_infos, bool show_priority)
         printf("%s", job->argv[j]);
     }
     printf("\n");
-}
-
-void remove_job(jobs_t **job, bool should_print)
-{
-    int id;
-
-    if (*job == NULL)
-        return;
-    if (should_print)
-        print_job(*job, false, false);
-    id = (int) (*job)->id;
-    for (int i = 0; i < (*job)->argc; i++)
-        free((*job)->argv[i]);
-    free((*job)->argv);
-    free(*job);
-    get_unique_shell()->process[id - 1] = NULL;
 }
 
 int put_job_to_foreground(jobs_t *job)

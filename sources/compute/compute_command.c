@@ -16,41 +16,13 @@
 #include "path_explorer.h"
 
 static
-int run_builtins(commands_t *cmd, int (fptr)(shell_t *, int, char **))
-{
-    int rt_value = NO_CMD_FOUND;
-    int original_stdin = dup(STDIN_FILENO);
-    int original_stdout = dup(STDOUT_FILENO);
-
-    if (cmd->fd_in != STDIN_FILENO) {
-        dup2(cmd->fd_in, STDIN_FILENO);
-        close(cmd->fd_in);
-    }
-    if (cmd->fd_out != STDOUT_FILENO) {
-        dup2(cmd->fd_out, STDOUT_FILENO);
-        close(cmd->fd_out);
-    }
-    rt_value = fptr(cmd->shell, cmd->argc, cmd->argv);
-    dup2(original_stdin, STDIN_FILENO);
-    dup2(original_stdout, STDOUT_FILENO);
-    return rt_value;
-}
-
-static
-int search_and_run_builtins(commands_t *cmd)
-{
-    for (int i = 0; builtins_list[i].cmd != NULL; i += 1)
-        if (strcmp(builtins_list[i].cmd, cmd->argv[0]) == 0)
-            return run_builtins(cmd, builtins_list[i].fptr);
-    return NO_CMD_FOUND;
-}
-
-static
 int handle_if_stopped(commands_t *cmd, pid_t pid, int child_status)
 {
+    jobs_t *job;
+
     printf("\nSuspended\n");
     if (cmd != NULL) {
-        jobs_t *job = new_job(cmd->shell);
+        job = new_job(cmd->shell);
         job->state = SUSPENDED;
         job->pid = pid;
         job->is_running = true;
@@ -66,10 +38,12 @@ int handle_if_stopped(commands_t *cmd, pid_t pid, int child_status)
 static
 int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
 {
+    jobs_t *job;
+
     if (WIFSTOPPED(child_status))
         return handle_if_stopped(cmd, pid, child_status);
     if (WIFEXITED(child_status)) {
-        jobs_t *job = get_job_from_pid(get_unique_shell(), pid);
+        job = get_job_from_pid(get_unique_shell(), pid);
         if (job != NULL) {
             job->state = DONE;
             remove_job(&job, false);
@@ -86,17 +60,23 @@ int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
 }
 
 static
-void child_process(commands_t *cmd)
+void reset_sig_for_child(void)
 {
-    char **env = get_env_array(cmd->shell);
-
-    setpgid(0, 0);
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
     signal(SIGTSTP, SIG_DFL);
     signal(SIGTTIN, SIG_DFL);
     signal(SIGTTOU, SIG_DFL);
     signal(SIGCHLD, SIG_DFL);
+}
+
+static
+void child_process(commands_t *cmd)
+{
+    char **env = get_env_array(cmd->shell);
+
+    setpgid(0, 0);
+    reset_sig_for_child();
     if (cmd->fd_in != STDIN_FILENO) {
         dup2(cmd->fd_in, STDIN_FILENO);
         close(cmd->fd_in);
