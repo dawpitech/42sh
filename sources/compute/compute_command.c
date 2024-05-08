@@ -46,8 +46,20 @@ int search_and_run_builtins(commands_t *cmd)
 }
 
 static
-int compute_return_code(int child_status)
+int compute_return_code(commands_t *cmd, pid_t pid, int child_status)
 {
+    if (WIFSTOPPED(child_status)) {
+        printf("\nSuspended\n");
+        jobs_t *job = new_job(cmd->shell);
+        job->state = SUSPENDED;
+        job->pid = pid;
+        job->is_running = true;
+        job->argc = cmd->argc;
+        job->argv = malloc(sizeof(char *) * (cmd->argc + 1));
+        job->argv[0] = strdup(cmd->exec_name);
+        for (int i = 1; i < cmd->argc; i++)
+            job->argv[i] = strdup(cmd->argv[i]);
+    }
     if (WIFSIGNALED(child_status)) {
         my_put_stderr(strsignal(WTERMSIG(child_status)));
         if (WCOREDUMP(child_status))
@@ -97,8 +109,8 @@ int handle_detached_process(commands_t *cmd, pid_t pid)
     job->argv[cmd->argc] = NULL;
     job->pid = pid;
     job->is_running = true;
-    job->state = BACKGROUND;
-    printf("[%d] %d\n", job->id,pid);
+    job->state = RUNNING;
+    printf("[%d] %d\n", job->id, pid);
     return RET_VALID;
 }
 
@@ -107,16 +119,16 @@ int launch_binary(commands_t *cmd)
 {
     pid_t pid;
     int child_status;
-    int ab;
 
     pid = fork();
     if (pid == 0) {
         child_process(cmd);
         exit(61);
     } else {
-        printf("PID: %d\n", pid);
-        setpgid(pid, pid);
-        tcsetpgrp(STDIN_FILENO, pid);
+        if (!cmd->job_control) {
+            setpgid(pid, pid);
+            tcsetpgrp(STDIN_FILENO, pid);
+        }
         if (cmd->fd_in != STDIN_FILENO)
             close(cmd->fd_in);
         if (cmd->fd_out != STDOUT_FILENO) {
@@ -125,14 +137,10 @@ int launch_binary(commands_t *cmd)
         }
         if (cmd->job_control)
             return handle_detached_process(cmd, pid);
-        printf("waiting for pid: %d\n", pid);
-        ab = waitpid(-pid, &child_status, WUNTRACED);
-        printf("%d\n", ab);
+        waitpid(-pid, &child_status, WUNTRACED);
         signal(SIGTTOU, SIG_IGN);
-        printf("alice\n");
         tcsetpgrp(STDIN_FILENO, getpid());
-        printf("bob\n");
-        return compute_return_code(child_status);
+        return compute_return_code(cmd, pid, child_status);
     }
 }
 

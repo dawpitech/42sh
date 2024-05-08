@@ -97,9 +97,10 @@ typedef struct {
     char **argv;
     pid_t pid;
     bool is_running;
+    char priority;
     enum {
-        FOREGROUND,
-        BACKGROUND,
+        RUNNING,
+        CONTINUED,
         SUSPENDED,
         DONE,
     } state;
@@ -169,6 +170,8 @@ int compute_cmd(commands_t *cmd);
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
 jobs_t *get_job_from_pid(shell_t *shell, int pid);
+void print_job(jobs_t *job, bool extended_infos, bool show_priority);
+void update_childs(shell_t *shell);
 
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env);

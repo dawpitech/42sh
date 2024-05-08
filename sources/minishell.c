@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
+#include <sys/wait.h>
 
 #include "minishell.h"
 
@@ -52,31 +53,6 @@ void exiting_hook(shell_t *shell)
 }
 
 static
-void print_done_job(jobs_t *job)
-{
-    printf("[%d]\tDone\t\t\t\t", job->id);
-    for (int j = 0; j < job->argc; j++) {
-        if (j != 0)
-            printf(" ");
-        printf("%s", job->argv[j]);
-    }
-    printf("\n");
-}
-
-static
-void handle_child_proc(shell_t *shell)
-{
-    for (int i = 0; i < MAX_JOBS; i++) {
-        if (shell->process[i] != NULL && shell->process[i]->state == DONE) {
-            print_done_job(shell->process[i]);
-            free(shell->process[i]->argv);
-            free(shell->process[i]);
-            shell->process[i] = NULL;
-        }
-    }
-}
-
-static
 void input_loop(shell_t *shell)
 {
     if (present_prompt(shell) == RET_ERROR) {
@@ -84,6 +60,7 @@ void input_loop(shell_t *shell)
         return;
     }
     shell->root = parse_input(shell->prompt->raw_input, shell);
+    update_childs(shell);
     if (shell->root == NULL) {
         shell->cmds_valid = false;
         shell->last_exit_code = 1;
@@ -92,7 +69,6 @@ void input_loop(shell_t *shell)
         shell->last_exit_code = compute_root(shell->root);
     history_add(shell, shell->prompt->raw_input);
     free_parser(shell->root);
-    handle_child_proc(shell);
 }
 
 int minishell(__attribute__((unused)) int argc,
@@ -107,7 +83,6 @@ int minishell(__attribute__((unused)) int argc,
     signal(SIGTTIN, SIG_IGN);
     signal(SIGTTOU, SIG_IGN);
     signal(SIGCHLD, SIG_DFL);
-    //signal(SIGCHLD, handle_sig_child);
     setpgid(0, 0);
     tcsetpgrp(STDIN_FILENO, getpgid(getpid()));
     if (initialize_shell(shell, env) != EXIT_SUCCESS_TECH)
