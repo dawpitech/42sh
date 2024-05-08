@@ -42,7 +42,7 @@ list_t *init_list(list_t *new, char *input)
 static
 void remove_space(list_t *list)
 {
-    if (!list)
+    if (!list || list->cursor >= list->input_len)
         return;
     while (isspace(list->input[list->cursor])) {
         list->cursor += 1;
