@@ -112,13 +112,13 @@ void remove_char(shell_t *shell)
         memmove(&shell->prompt->input[shell->prompt->cursor_pos - 1],
                 &shell->prompt->input[shell->prompt->cursor_pos],
                 strlen(shell->prompt->input) - shell->prompt->cursor_pos + 1);
-        write(STDOUT_FILENO, "\033[2K", 4);
-        write(STDOUT_FILENO, "\r", 1);
+        printf("\033[2K");
+        printf("\r");
         print_prompt(shell);
-        write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
+        printf("%s", shell->prompt->input);
         for (int i = 0; i <
                 (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
-            write(STDOUT_FILENO, "\033[D", 3);
+            printf("\033[D");
         shell->prompt->cursor_pos -= 1;
         shell->prompt->cursor_pos = shell->prompt->cursor_pos;
         shell->prompt->len -= 1;
@@ -136,13 +136,13 @@ void add_char(shell_t *shell)
     shell->prompt->input[shell->prompt->cursor_pos] = shell->prompt->ch;
     shell->prompt->len += 1;
     shell->prompt->cursor_pos += 1;
-    write(STDOUT_FILENO, "\033[2K", 4);
-    write(STDOUT_FILENO, "\r", 1);
+    printf("\033[2K");
+    printf("\r");
     print_prompt(shell);
-    write(STDOUT_FILENO, shell->prompt->input, shell->prompt->len);
+    printf("%s", shell->prompt->input);
     for (int i = 0;
             i < (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
-        write(STDOUT_FILENO, "\033[D", 3);
+        printf("\033[D");
 }
 
 static
@@ -154,13 +154,13 @@ void handle_arrow_keys(shell_t *shell)
         case 'D':
             if (shell->prompt->cursor_pos <= 0)
                 break;
-            write(STDOUT_FILENO, "\033[D", 3);
+            printf("\033[D");
             shell->prompt->cursor_pos -= 1;
             break;
         case 'C':
             if (shell->prompt->cursor_pos >= (int)strlen(shell->prompt->input))
                 break;
-            write(STDOUT_FILENO, "\033[C", 3);
+            printf("\033[C");
             shell->prompt->cursor_pos += 1;
             break;
         default:
