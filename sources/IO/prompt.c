@@ -177,6 +177,7 @@ char *get_from_stdin(shell_t *shell)
     do {
         shell->prompt->ch = (char)getchar();
         if (shell->prompt->ch == '\n')
+        shell->prompt->ch = (char) getchar();
             break;
         if (shell->prompt->ch == 127) {
             remove_char(shell);
