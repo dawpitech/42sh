@@ -40,6 +40,7 @@
 
 typedef struct root_s root_t;
 typedef struct shell_s shell_t;
+extern shell_t *signal_shell;
 
 typedef struct commands_s {
     char *exec_name;
@@ -164,6 +165,7 @@ root_t *loop_root(root_t *root, token_t **token, shell_t *shell);
 pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token);
 or_t *loop_or(or_t *or_obj, token_t **token, shell_t *shell);
 and_t *loop_and(and_t *and_obj, token_t **token, shell_t *shell);
+void handle_ctrl_c(int signal);
 
 // PARENTHESE
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);

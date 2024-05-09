@@ -10,9 +10,12 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #include "minishell.h"
 #include "ansi_chars.h"
+
+shell_t *signal_shell;
 
 static
 bool is_git_repo(void)
@@ -172,6 +175,7 @@ static
 char *get_from_stdin(shell_t *shell)
 {
     do {
+        signal(SIGINT, handle_ctrl_c);
         shell->prompt->ch = (char) getchar();
         if (shell->prompt->ch == 4)
             return NULL;
@@ -194,6 +198,7 @@ char *get_from_stdin(shell_t *shell)
 
 int present_prompt(shell_t *shell)
 {
+    signal_shell = shell;
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
     shell->prompt->old_config = init_termios();
@@ -211,7 +216,5 @@ int present_prompt(shell_t *shell)
     else
         shell->last_exit_code = 0;
     shell->running = false;
-    if (shell->prompt->raw_input != NULL)
-        free(shell->prompt);
     return RET_ERROR;
 }

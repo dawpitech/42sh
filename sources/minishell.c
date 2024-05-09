@@ -71,6 +71,13 @@ void input_loop(shell_t *shell)
     free_parser(shell->root);
 }
 
+void handle_ctrl_c(int signal)
+{
+    (void) signal;
+    printf("\n");
+    print_prompt(signal_shell);
+}
+
 int minishell(__attribute__((unused)) int argc,
     __attribute__((unused)) char **argv, char **env)
 {
