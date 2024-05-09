@@ -20,6 +20,7 @@
     #define NO_CMD_FOUND (-42)
     #include <stdlib.h>
     #include <stdbool.h>
+    #include <termios.h>
     #include "lexer_ast.h"
     #define CMD_IS_A_PIPE (-69)
     #define HISTORY_FILE (".history")
@@ -84,6 +85,7 @@ typedef struct env_var_s {
 
 typedef struct {
     char *raw_input;
+    struct termios old_config;
     char *input;
     int cursor_pos;
     size_t len;

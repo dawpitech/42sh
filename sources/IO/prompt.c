@@ -171,8 +171,6 @@ void handle_arrow_keys(shell_t *shell)
 static
 char *get_from_stdin(shell_t *shell)
 {
-    struct termios old_config = init_termios();
-
     do {
         shell->prompt->ch = (char) getchar();
         if (shell->prompt->ch == 4)
@@ -189,7 +187,7 @@ char *get_from_stdin(shell_t *shell)
         }
         add_char(shell);
     } while (1);
-    tcsetattr(STDIN_FILENO, TCSANOW, &old_config);
+    tcsetattr(STDIN_FILENO, TCSANOW, &shell->prompt->old_config);
     printf("\n");
     return shell->prompt->input;
 }
@@ -198,6 +196,7 @@ int present_prompt(shell_t *shell)
 {
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
+    shell->prompt->old_config = init_termios();
     shell->prompt->input = calloc(1, sizeof(char));
     shell->prompt->cursor_pos = 0;
     shell->prompt->len = 0;
