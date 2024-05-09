@@ -176,6 +176,13 @@ int compute_cmd(commands_t *cmd);
 
 int wait_after_launch_process(pid_t pid, commands_t *cmd);
 
+// PROMPT
+void print_prompt(shell_t *shell);
+void history_up(shell_t *shell);
+void history_down(shell_t *shell);
+void cursor_left(shell_t *shell);
+void cursor_right(shell_t *shell);
+
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
 jobs_t *get_job_from_pid(shell_t *shell, int pid);

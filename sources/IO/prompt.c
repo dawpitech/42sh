@@ -68,7 +68,6 @@ char *get_current_dir(void)
     return current_dir;
 }
 
-static
 void print_prompt(shell_t *shell)
 {
     char *color = shell->last_exit_code != 0 ? AC_C_RED : AC_C_GREEN;
@@ -149,47 +148,20 @@ void add_char(shell_t *shell)
 static
 void handle_arrow_keys(shell_t *shell)
 {
-    history_entry_t *entry = NULL;
     (void)!getchar();
     shell->prompt->ch = (char)getchar();
     switch (shell->prompt->ch) {
         case 'D':
-            if (shell->prompt->cursor_pos <= 0)
-                break;
-            printf("\033[D");
-            shell->prompt->cursor_pos -= 1;
+            cursor_left(shell);
             break;
         case 'C':
-            if (shell->prompt->cursor_pos >= (int)strlen(shell->prompt->input))
-                break;
-            printf("\033[C");
-            shell->prompt->cursor_pos += 1;
+            cursor_right(shell);
             break;
         case 'A':
-            if (shell->prompt->history_pos > 0)
-                shell->prompt->history_pos -= 1;
-            entry = history_get(shell, shell->prompt->history_pos);
-            if (entry != NULL) {
-                strcpy(shell->prompt->input, entry->line);
-                shell->prompt->cursor_pos = (int) strlen(shell->prompt->input);
-                shell->prompt->len = shell->prompt->cursor_pos;
-                printf("\033[2K\r");
-                print_prompt(shell);
-                printf("%s", shell->prompt->input);
-            }
+            history_up(shell);
             break;
         case 'B':
-            if (shell->prompt->history_pos < (int) shell->history_size - 1)
-                shell->prompt->history_pos += 1;
-            entry = history_get(shell, shell->prompt->history_pos);
-            if (entry != NULL) {
-                strcpy(shell->prompt->input, entry->line);
-                shell->prompt->cursor_pos = (int) strlen(shell->prompt->input);
-                shell->prompt->len = shell->prompt->cursor_pos;
-                printf("\033[2K\r");
-                print_prompt(shell);
-                printf("%s", shell->prompt->input);
-            }
+            history_down(shell);
             break;
         default:
             break;
@@ -235,14 +207,12 @@ int present_prompt(shell_t *shell)
         return RET_ERROR;
     print_prompt(shell);
     shell->prompt->raw_input = get_from_stdin(shell);
-    if (shell->prompt->raw_input == NULL) {
-        shell->running = false;
-        shell->last_exit_code = 0;
-        return RET_ERROR;
-    }
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
+    else
+        shell->last_exit_code = 0;
     shell->running = false;
-    free(shell->prompt);
+    if (shell->prompt->raw_input != NULL)
+        free(shell->prompt);
     return RET_ERROR;
 }
