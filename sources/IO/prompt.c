@@ -175,7 +175,9 @@ char *get_from_stdin(shell_t *shell)
 
     do {
         shell->prompt->ch = (char) getchar();
-        if (shell->prompt->ch == '\n' || shell->prompt->ch == 4)
+        if (shell->prompt->ch == 4)
+            return NULL;
+        if (shell->prompt->ch == '\n')
             break;
         if (shell->prompt->ch == 127) {
             remove_char(shell);
@@ -204,6 +206,11 @@ int present_prompt(shell_t *shell)
         return RET_ERROR;
     print_prompt(shell);
     shell->prompt->raw_input = get_from_stdin(shell);
+    if (shell->prompt->raw_input == NULL) {
+        shell->running = false;
+        shell->last_exit_code = 0;
+        return RET_ERROR;
+    }
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     shell->running = false;
