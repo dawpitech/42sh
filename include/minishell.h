@@ -125,6 +125,7 @@ typedef struct shell_s {
     bool cmds_valid;
     bool isatty;
     bool multiple_exit;
+    bool local_command;
     char *current_path;
     char *last_path;
     int last_exit_code;
@@ -183,8 +184,7 @@ void update_childs(shell_t *shell);
 int put_job_to_foreground(jobs_t *job);
 void remove_job(jobs_t **job, bool should_print);
 
-int minishell(__attribute__((unused)) int argc,
-    __attribute__((unused)) char **argv, char **env);
+int minishell(int argc, char **argv, char **env);
 int present_prompt(shell_t *shell);
 root_t *parse_input(char *raw_input, shell_t *shell);
 int run_command(shell_t *shell, commands_t *command);

@@ -77,7 +77,7 @@ SRC +=	./sources/parser_ast/memory_management_parser/free_parser_lexer.c
 SRC +=	./sources/parser_ast/memory_management_parser/init_parser_struct.c
 
 T_SRC	:=	$(SRC)
-T_SRC	+=	./tests/my_tests.c
+T_SRC	+=	./tests/functionnal_tests.c
 
 SRC	+=	./main.c
 
