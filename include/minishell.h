@@ -23,6 +23,7 @@
     #include "lexer_ast.h"
     #define CMD_IS_A_PIPE (-69)
     #define HISTORY_FILE (".history")
+    #define MAX_JOBS 1024
 
     #define IS_LOW(c) (((c) >= 'a' && (c) <= 'z') ? (1) : (0))
     #define IS_UP(c) (((c) >= 'A' && (c) <= 'Z') ? (1) : (0))
@@ -45,6 +46,7 @@ typedef struct commands_s {
     int argc;
     int fd_in;
     int fd_out;
+    bool job_control;
     shell_t *shell;
     root_t *sub_shell;
 } commands_t;
@@ -82,6 +84,10 @@ typedef struct env_var_s {
 
 typedef struct {
     char *raw_input;
+    char *input;
+    int cursor_pos;
+    size_t len;
+    char ch;
 } prompt_t;
 
 typedef struct {
@@ -91,7 +97,24 @@ typedef struct {
 
 typedef struct alias_s alias_t;
 
+typedef struct {
+    unsigned int id;
+    int argc;
+    char **argv;
+    pid_t pid;
+    bool is_running;
+    char priority;
+    enum {
+        RUNNING,
+        CONTINUED,
+        SUSPENDED,
+        KILLED,
+        DONE,
+    } state;
+} jobs_t;
+
 typedef struct shell_s {
+    jobs_t *process[MAX_JOBS];
     prompt_t *prompt;
     env_var_t *env_vars;
     list_t *list;
@@ -99,10 +122,13 @@ typedef struct shell_s {
     history_entry_t **history_entries;
     alias_t **aliases;
     unsigned int history_size;
+    unsigned int nb_jobs;
     int nb_env_var;
     bool running;
     bool cmds_valid;
     bool isatty;
+    bool multiple_exit;
+    bool local_command;
     char *current_path;
     char *last_path;
     int last_exit_code;
@@ -118,7 +144,6 @@ pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
 root_t *init_root(void);
 void free_parser(root_t *root);
-void free_parser_lexer(root_t *root, list_t *list);
 and_t *init_and(void);
 or_t *init_or(void);
 
@@ -152,8 +177,17 @@ int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
 
-int minishell(__attribute__((unused)) int argc,
-    __attribute__((unused)) char **argv, char **env);
+int wait_after_launch_process(pid_t pid, commands_t *cmd);
+
+// JOBS CONTROL
+jobs_t *new_job(shell_t *shell);
+jobs_t *get_job_from_pid(shell_t *shell, int pid);
+void print_job(jobs_t *job, bool extended_infos, bool show_priority);
+void update_childs(shell_t *shell);
+int put_job_to_foreground(jobs_t *job);
+void remove_job(jobs_t **job, bool should_print);
+
+int minishell(int argc, char **argv, char **env);
 int present_prompt(shell_t *shell);
 root_t *parse_input(char *raw_input, shell_t *shell);
 int run_command(shell_t *shell, commands_t *command);
@@ -164,7 +198,9 @@ int add_env_var(shell_t *context, char *key, char *value);
 int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
-void handle_ctrl_c(int signal);
+void handle_ctrl_c(__attribute__((unused)) int signal);
+void handle_ctrl_z(__attribute__((unused)) int signal);
+void handle_sig_child(int signal);
 void history_add(shell_t *shell, char const *line);
 history_entry_t *history_get(shell_t *shell, int index);
 int write_hist(shell_t *shell);
@@ -172,4 +208,6 @@ int load_history(shell_t *shell);
 void history_free(shell_t *shell);
 list_t *lexer(char *raw_input, list_t *list);
 int parser_of_lexer(shell_t *mysh);
+shell_t *get_unique_shell(void);
+int search_and_run_builtins(commands_t *cmd);
 #endif //MINISHELL_MINISHELL_H

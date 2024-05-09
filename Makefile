@@ -17,6 +17,8 @@ CFLAGS	+=	-Wmissing-prototypes
 CFLAGS	+=	-Wno-unknown-pragmas
 CFLAGS	+=	-pedantic -g3
 CFLAGS	+=	-I./include/
+CFLAGS	+=	-MMD -MP
+CFLAGS	+=	-Wno-stringop-overflow
 
 T_CFLAGS	:= $(CFLAGS)
 T_CFLAGS	+=	-lcriterion
@@ -25,15 +27,17 @@ T_CFLAGS	+=	--coverage
 BDIR	=	.build
 T_BDIR	=	.buildTests
 
-NAME	=	mysh
+NAME	=	42sh
 T_NAME	=	unit_tests
 SEGFAULT_NAME	=	segfault.bin
 FP_EXECP_NAME	=	floating.bin
 
 SRC = ./sources/minishell.c
+SRC	+=	./sources/builtins/run_builtins.c
 SRC	+=	./sources/builtins/builtins_cmd.c
 SRC	+=	./sources/builtins/builtins_history.c
 SRC	+=	./sources/builtins/builtins_search_history.c
+SRC	+=	./sources/builtins/builtins_jobs_control.c
 SRC += ./sources/builtins/alias.c
 SRC	+=	./sources/env/env_manager.c
 SRC	+=	./sources/env/env_converter.c
@@ -47,6 +51,8 @@ SRC	+=	./sources/compute/compute_and.c
 SRC	+=	./sources/compute/compute_or.c
 SRC	+=	./sources/compute/compute_pipe.c
 SRC	+=	./sources/compute/compute_command.c
+SRC	+=	./sources/jobs_control/jobs_manager.c
+SRC	+=	./sources/jobs_control/jobs_destroyer.c
 SRC +=	./sources/parser_ast/lexer.c
 SRC +=	./sources/parser_ast/backtrack_lexer.c
 SRC +=	./sources/parser_ast/lib_lexer/my_isparenthese.c
@@ -72,21 +78,28 @@ SRC +=	./sources/parser_ast/memory_management_parser/free_parser_lexer.c
 SRC +=	./sources/parser_ast/memory_management_parser/init_parser_struct.c
 
 T_SRC	:=	$(SRC)
-T_SRC	+=	./tests/my_tests.c
+T_SRC	+=	./tests/functionnal_tests.c
 
 SRC	+=	./main.c
 
 GCOVR_OUTPUT = gcovr
 
 OBJ	=	$(SRC:%.c=$(BDIR)/%.o)
+DEPS	=	$(OBJ:%.o=%.d)
+
 T_OBJ	=	$(T_SRC:%.c=$(T_BDIR)/%.o)
+T_DEPS	=	$(T_OBJ:%.o=%.d)
 
 all:	$(NAME)
+
+-include $(DEPS)
+-include $(T_DEPS)
 
 $(NAME):	$(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
 
-$(T_NAME):	fclean $(T_OBJ)
+.NOTPARALLEL: $(T_NAME)
+$(T_NAME):	$(T_OBJ)
 	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME)
 
 $(T_BDIR)/%.o:	%.c
@@ -97,7 +110,7 @@ $(BDIR)/%.o:	%.c
 	@ mkdir -p $(dir $@)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-asan:	CFLAGS += -fsanitize=address,leak,undefined -g3
+asan:	CFLAGS += -fsanitize=address,leak,undefined -g3 -fno-omit-frame-pointer
 asan: re
 
 debug:	CFLAGS	+=	-g3
@@ -124,6 +137,7 @@ fclean:	clean
 	@ rm -f $(SEGFAULT_NAME)
 	@ rm -f $(FP_EXECP_NAME)
 
+.NOTPARALLEL: re
 re:	fclean all
 
 segfault:

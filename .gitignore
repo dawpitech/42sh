@@ -61,7 +61,7 @@ dkms.conf
 .buildTests/
 
 # Custom
-mysh
+42sh
 unit_tests
 *.bin
 /.history

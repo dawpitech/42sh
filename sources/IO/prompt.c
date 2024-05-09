@@ -7,8 +7,10 @@
 
 #include <malloc.h>
 #include <stddef.h>
-#include <string.h>
+#include <termios.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #include "minishell.h"
 #include "ansi_chars.h"
@@ -23,7 +25,10 @@ bool is_git_repo(void)
     fp = popen("git rev-parse --is-inside-work-tree 2>/dev/null", "r");
     if (fp == NULL)
         return false;
-    fgets(tmp, 1024, fp);
+    if (fgets(tmp, 1024, fp) == NULL) {
+        pclose(fp);
+        return false;
+    }
     if (strncmp(tmp, "true", 4) == 0)
         rt_value = true;
     pclose(fp);
@@ -39,7 +44,10 @@ char *get_git_branch(void)
     fp = popen("git rev-parse --abbrev-ref HEAD", "r");
     if (fp == NULL)
         return NULL;
-    fgets(branch_name, 1024 - 1, fp);
+    if (fgets(branch_name, 1024 - 1, fp) == NULL) {
+        pclose(fp);
+        return NULL;
+    }
     pclose(fp);
     branch_name[strlen(branch_name) - 1] = '\0';
     return branch_name;
@@ -71,43 +79,132 @@ void print_prompt(shell_t *shell)
     if (!shell->isatty)
         return;
     printf("%s%s➜ %s%s%s ", AC_BOLD, color, AC_C_BRIGHT_BLUE, current_dir,
-        AC_RESET);
+            AC_RESET);
     if (is_git_repo()) {
         branch_name = get_git_branch();
         printf("on %s%s%s %s %s", AC_C_MAGENTA, AC_BOLD, "", branch_name,
-            AC_RESET);
+                AC_RESET);
         free(branch_name);
     }
     printf("❯ ");
     free(current_dir);
+    fflush(stdout);
 }
 
 static
-char *get_from_stdin(void)
+struct termios init_termios(void)
 {
-    char *line = NULL;
-    size_t buff_value = 0;
-    int rt_value;
+    struct termios old_config;
+    struct termios new_config;
 
-    rt_value = (int) getline(&line, &buff_value, stdin);
-    if (rt_value <= 0) {
-        printf("exit\n");
-        free(line);
-        return NULL;
+    tcgetattr(STDIN_FILENO, &old_config);
+    new_config = old_config;
+    new_config.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
+    return old_config;
+}
+
+static
+void remove_char(shell_t *shell)
+{
+    if (shell->prompt->cursor_pos <= 0)
+        return;
+    if (strlen(shell->prompt->input) > 0) {
+        memmove(&shell->prompt->input[shell->prompt->cursor_pos - 1],
+                &shell->prompt->input[shell->prompt->cursor_pos],
+                strlen(shell->prompt->input) - shell->prompt->cursor_pos + 1);
+        printf("\033[2K");
+        printf("\r");
+        print_prompt(shell);
+        printf("%s", shell->prompt->input);
+        for (int i = 0; i <
+                (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
+            printf("\033[D");
+        shell->prompt->cursor_pos -= 1;
+        shell->prompt->cursor_pos = shell->prompt->cursor_pos;
+        shell->prompt->len -= 1;
     }
-    line[strlen(line) - 1] = '\0';
-    return line;
+}
+
+static
+void add_char(shell_t *shell)
+{
+    shell->prompt->input = realloc(shell->prompt->input,
+            shell->prompt->len + 2);
+    memmove(&shell->prompt->input[shell->prompt->cursor_pos + 1],
+            &shell->prompt->input[shell->prompt->cursor_pos],
+            shell->prompt->len - shell->prompt->cursor_pos);
+    shell->prompt->input[shell->prompt->cursor_pos] = shell->prompt->ch;
+    shell->prompt->len += 1;
+    shell->prompt->cursor_pos += 1;
+    printf("\033[2K");
+    printf("\r");
+    print_prompt(shell);
+    printf("%s", shell->prompt->input);
+    for (int i = 0;
+            i < (int) shell->prompt->len - shell->prompt->cursor_pos; i += 1)
+        printf("\033[D");
+}
+
+static
+void handle_arrow_keys(shell_t *shell)
+{
+    (void)!getchar();
+    shell->prompt->ch = (char)getchar();
+    switch (shell->prompt->ch) {
+        case 'D':
+            if (shell->prompt->cursor_pos <= 0)
+                break;
+            printf("\033[D");
+            shell->prompt->cursor_pos -= 1;
+            break;
+        case 'C':
+            if (shell->prompt->cursor_pos >= (int)strlen(shell->prompt->input))
+                break;
+            printf("\033[C");
+            shell->prompt->cursor_pos += 1;
+            break;
+        default:
+            break;
+    }
+}
+
+static
+char *get_from_stdin(shell_t *shell)
+{
+    struct termios old_config = init_termios();
+
+    do {
+        shell->prompt->ch = (char) getchar();
+        if (shell->prompt->ch == '\n' || shell->prompt->ch == 4)
+            break;
+        if (shell->prompt->ch == 127) {
+            remove_char(shell);
+            continue;
+        }
+        if (shell->prompt->ch == 27) {
+            handle_arrow_keys(shell);
+            continue;
+        }
+        add_char(shell);
+    } while (1);
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_config);
+    printf("\n");
+    return shell->prompt->input;
 }
 
 int present_prompt(shell_t *shell)
 {
     shell->cmds_valid = true;
     shell->prompt = malloc(sizeof(prompt_t));
+    shell->prompt->input = calloc(1, sizeof(char));
+    shell->prompt->cursor_pos = 0;
+    shell->prompt->len = 0;
+    shell->prompt->ch = 0;
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);
-    shell->prompt->raw_input = get_from_stdin();
-    history_add(shell, shell->prompt->raw_input);
+    shell->prompt->raw_input = get_from_stdin(shell);
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     shell->running = false;

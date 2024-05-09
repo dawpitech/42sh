@@ -19,9 +19,10 @@ autocompletion, history, etc.
 - [x] History
 - [x] Colors
 - [x] Builtins
+- [x] Prompt editing
+- [x] Job controls
 - [ ] Autocompletion
 - [ ] Aliases
-- [ ] Prompt editing
 
 ## Capabilities
 
@@ -40,16 +41,23 @@ It also handles the following syntax:
 * `|` for pipes
 * `;` to separate commands
 
+You can start the shell with a command already typed
+
+```bash
+./42sh -c "echo hello"
+hello
+```
+
 ## Compilation
 
 *Need to have gcc installed*
 ```bash
 git clone git@github.com:dawpitech/42sh.git
 cd 42sh
-make
+make -j
 ```
 ```bash
-./mysh
+./42sh
 ```
 Or using the provided nix flake:
 ```nix

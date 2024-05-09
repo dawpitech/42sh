@@ -66,6 +66,8 @@ int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
     c->fd_in = STDIN_FILENO;
     c->fd_out = STDOUT_FILENO;
     c->shell = shell;
+    c->sub_shell = NULL;
+    c->job_control = false;
     (*token) = (*token)->next;
     fill_arguments(token, c);
     new_pipe->tab_command[idx] = c;
@@ -109,23 +111,35 @@ int handle_redirection(pipe_t *new_pipe, token_t **token, shell_t *shell)
     return RET_VALID;
 }
 
-pipe_t *loop_pipe(pipe_t *new_pipe, token_t **token, shell_t *shell)
+static
+int handle_job_control(token_t *t, pipe_t *p, int idx)
 {
-    if (!new_pipe || !token)
+    if (!t || t->type != AND)
+        return RET_ERROR;
+    p->tab_command[idx - 1]->job_control = true;
+    t = t->next;
+    return RET_VALID;
+}
+
+pipe_t *loop_pipe(pipe_t *new_pipe, token_t **t, shell_t *shell)
+{
+    if (!new_pipe || !t)
         return NULL;
-    while ((*token) && ((*token)->type == IDENTIFIER ||
-        (*token)->type == OPERATOR ||
-        (*token)->type == L_PAREN || (*token)->type == R_PAREN)) {
+    while ((*t) && ((*t)->type == IDENTIFIER ||
+        (*t)->type == OPERATOR || (*t)->type == L_PAREN ||
+        (*t)->type == R_PAREN || (*t)->type == AND)) {
         if (realloc_tab_cmd(new_pipe) == RET_ERROR)
             return NULL;
-        if ((*token)->type == L_PAREN &&
-            handle_parenthese(new_pipe, token, shell) == 0)
-            return RET_VALID;
-        if (add_command(new_pipe, token, new_pipe->size, shell) == RET_ERROR)
+        if ((*t)->type == L_PAREN &&
+            handle_parenthese(new_pipe, t, shell) == 0)
+            return new_pipe;
+        if (add_command(new_pipe, t, new_pipe->size, shell) == RET_ERROR)
             return NULL;
-        if (handle_redirection(new_pipe, token, shell) == RET_ERROR)
+        if (handle_job_control((*t), new_pipe, new_pipe->size) == RET_VALID)
+            return new_pipe;
+        if (handle_redirection(new_pipe, t, shell) == RET_ERROR)
             return NULL;
-        if (!(*token) || (*token)->type == END || (*token)->type != PIPE)
+        if (!(*t) || (*t)->type == END || (*t)->type != PIPE)
             break;
     }
     return new_pipe;

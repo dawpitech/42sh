@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+
 #include "builtins_cmd.h"
 #include "utils.h"
 
@@ -75,6 +77,12 @@ int execute_unsetenv(shell_t *shell, int argc, char **argv)
 int execute_exit(shell_t *shell, __attribute__((unused)) int argc,
     __attribute__((unused)) char **argv)
 {
+    for (int i = 0; i < MAX_JOBS && !shell->multiple_exit; i++)
+        if (shell->process[i] != NULL) {
+            my_put_stderr("There are suspended jobs.\n");
+            shell->multiple_exit = true;
+            return EXIT_FAILURE_TECH;
+        }
     shell->running = false;
     return EXIT_SUCCESS_TECH;
 }
