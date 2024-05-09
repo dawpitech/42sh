@@ -128,15 +128,13 @@ void remove_char(shell_t *shell)
 static
 void add_char(shell_t *shell)
 {
-    char *new_input = realloc(shell->prompt->input, shell->prompt->len + 2);
-    if (new_input == NULL)
-        return;
-    shell->prompt->input = new_input;
-    shell->prompt->input[shell->prompt->len] = shell->prompt->ch;
-    shell->prompt->input[shell->prompt->len + 1] = '\0';
+    shell->prompt->input = realloc(shell->prompt->input,
+            shell->prompt->len + 2);
     memmove(&shell->prompt->input[shell->prompt->cursor_pos + 1],
             &shell->prompt->input[shell->prompt->cursor_pos],
             shell->prompt->len - shell->prompt->cursor_pos);
+    shell->prompt->input[shell->prompt->cursor_pos] = shell->prompt->ch;
+    shell->prompt->input[shell->prompt->len + 1] = '\0';
     shell->prompt->len += 1;
     shell->prompt->cursor_pos += 1;
     printf("\033[2K");
