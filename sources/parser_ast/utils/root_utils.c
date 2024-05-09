@@ -19,7 +19,6 @@ int realloc_tab_sc(root_t *root)
     else
         root->tab_sc = realloc(root->tab_sc,
             sizeof(semicol_t *) * (root->size + 2));
-    root->tab_sc[root->size] = malloc(sizeof(semicol_t));
     if (!root->tab_sc)
         return RET_ERROR;
     root->tab_sc[root->size + 1] = NULL;
