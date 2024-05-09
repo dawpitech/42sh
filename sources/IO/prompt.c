@@ -151,6 +151,7 @@ void add_char(shell_t *shell)
 static
 void handle_arrow_keys(shell_t *shell)
 {
+    history_entry_t *entry = NULL;
     (void)!getchar();
     shell->prompt->ch = (char)getchar();
     switch (shell->prompt->ch) {
@@ -165,6 +166,32 @@ void handle_arrow_keys(shell_t *shell)
                 break;
             printf("\033[C");
             shell->prompt->cursor_pos += 1;
+            break;
+        case 'A':
+            if (shell->prompt->history_pos > 0)
+                shell->prompt->history_pos -= 1;
+            entry = history_get(shell, shell->prompt->history_pos);
+            if (entry != NULL) {
+                strcpy(shell->prompt->input, entry->line);
+                shell->prompt->cursor_pos = (int) strlen(shell->prompt->input);
+                shell->prompt->len = shell->prompt->cursor_pos;
+                printf("\033[2K\r");
+                print_prompt(shell);
+                printf("%s", shell->prompt->input);
+            }
+            break;
+        case 'B':
+            if (shell->prompt->history_pos < (int) shell->history_size - 1)
+                shell->prompt->history_pos += 1;
+            entry = history_get(shell, shell->prompt->history_pos);
+            if (entry != NULL) {
+                strcpy(shell->prompt->input, entry->line);
+                shell->prompt->cursor_pos = (int) strlen(shell->prompt->input);
+                shell->prompt->len = shell->prompt->cursor_pos;
+                printf("\033[2K\r");
+                print_prompt(shell);
+                printf("%s", shell->prompt->input);
+            }
             break;
         default:
             break;
@@ -205,6 +232,7 @@ int present_prompt(shell_t *shell)
     shell->prompt->cursor_pos = 0;
     shell->prompt->len = 0;
     shell->prompt->ch = 0;
+    shell->prompt->history_pos = (int) shell->history_size;
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);

@@ -88,6 +88,7 @@ typedef struct {
     int cursor_pos;
     size_t len;
     char ch;
+    int history_pos;
 } prompt_t;
 
 typedef struct {
