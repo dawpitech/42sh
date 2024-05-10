@@ -20,6 +20,7 @@
     #define NO_CMD_FOUND (-42)
     #include <stdlib.h>
     #include <stdbool.h>
+    #include <termios.h>
     #include "lexer_ast.h"
     #define CMD_IS_A_PIPE (-69)
     #define HISTORY_FILE (".history")
@@ -39,6 +40,7 @@
 
 typedef struct root_s root_t;
 typedef struct shell_s shell_t;
+extern shell_t *signal_shell;
 
 typedef struct commands_s {
     char *exec_name;
@@ -84,10 +86,12 @@ typedef struct env_var_s {
 
 typedef struct {
     char *raw_input;
+    struct termios old_config;
     char *input;
     int cursor_pos;
     size_t len;
     char ch;
+    int history_pos;
 } prompt_t;
 
 typedef struct {
@@ -176,6 +180,13 @@ int compute_cmd(commands_t *cmd);
 
 int wait_after_launch_process(pid_t pid, commands_t *cmd);
 
+// PROMPT
+void print_prompt(shell_t *shell);
+void history_up(shell_t *shell);
+void history_down(shell_t *shell);
+void cursor_left(shell_t *shell);
+void cursor_right(shell_t *shell);
+
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
 jobs_t *get_job_from_pid(shell_t *shell, int pid);
@@ -195,7 +206,6 @@ int add_env_var(shell_t *context, char *key, char *value);
 int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
-void handle_ctrl_c(__attribute__((unused)) int signal);
 void handle_ctrl_z(__attribute__((unused)) int signal);
 void handle_sig_child(int signal);
 void history_add(shell_t *shell, char const *line);
