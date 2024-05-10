@@ -20,7 +20,7 @@ shell_t *get_unique_shell(void)
 }
 
 static
-int initialize_shell(shell_t *shell, char **env)
+int initialize_shell(shell_t *shell, char **env, char **argv, int argc)
 {
     if (parse_env_var(shell, env) == RET_ERROR)
         return RET_ERROR;
@@ -30,6 +30,15 @@ int initialize_shell(shell_t *shell, char **env)
     shell->last_path = NULL;
     shell->last_exit_code = 0;
     load_history(shell);
+    if (argc == 3 && strcmp(argv[1], "-c") == 0) {
+        shell->local_command = true;
+        shell->isatty = false;
+        shell->cmds_valid = true;
+        shell->prompt = calloc(1, sizeof(prompt_t));
+        shell->prompt->raw_input = strdup(argv[2]);
+    } else {
+        shell->local_command = false;
+    }
     return RET_VALID;
 }
 
@@ -55,7 +64,7 @@ void exiting_hook(shell_t *shell)
 static
 void input_loop(shell_t *shell)
 {
-    if (present_prompt(shell) == RET_ERROR) {
+    if (!shell->local_command && present_prompt(shell) == RET_ERROR) {
         shell->running = false;
         return;
     }
@@ -69,17 +78,11 @@ void input_loop(shell_t *shell)
         shell->last_exit_code = compute_root(shell->root);
     history_add(shell, shell->prompt->raw_input);
     free_parser(shell->root);
+    if (shell->local_command)
+        shell->running = false;
 }
 
-void handle_ctrl_c(int signal)
-{
-    (void) signal;
-    printf("\n");
-    print_prompt(signal_shell);
-}
-
-int minishell(__attribute__((unused)) int argc,
-    __attribute__((unused)) char **argv, char **env)
+int minishell(int argc, char **argv, char **env)
 {
     shell_t *shell = get_unique_shell();
 
@@ -92,7 +95,7 @@ int minishell(__attribute__((unused)) int argc,
     signal(SIGCHLD, SIG_DFL);
     setpgid(0, 0);
     tcsetpgrp(STDIN_FILENO, getpgid(getpid()));
-    if (initialize_shell(shell, env) != EXIT_SUCCESS_TECH)
+    if (initialize_shell(shell, env, argv, argc) != EXIT_SUCCESS_TECH)
         return EXIT_FAILURE_TECH;
     while (shell->running)
         input_loop(shell);

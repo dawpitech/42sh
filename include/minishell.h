@@ -129,6 +129,7 @@ typedef struct shell_s {
     bool cmds_valid;
     bool isatty;
     bool multiple_exit;
+    bool local_command;
     char *current_path;
     char *last_path;
     int last_exit_code;
@@ -165,7 +166,6 @@ root_t *loop_root(root_t *root, token_t **token, shell_t *shell);
 pipe_t *loop_redirect(pipe_t *new_pipe, token_t **token);
 or_t *loop_or(or_t *or_obj, token_t **token, shell_t *shell);
 and_t *loop_and(and_t *and_obj, token_t **token, shell_t *shell);
-void handle_ctrl_c(int signal);
 
 // PARENTHESE
 int handle_parenthese(pipe_t *pipe, token_t **node, shell_t *shell);
@@ -195,8 +195,7 @@ void update_childs(shell_t *shell);
 int put_job_to_foreground(jobs_t *job);
 void remove_job(jobs_t **job, bool should_print);
 
-int minishell(__attribute__((unused)) int argc,
-    __attribute__((unused)) char **argv, char **env);
+int minishell(int argc, char **argv, char **env);
 int present_prompt(shell_t *shell);
 root_t *parse_input(char *raw_input, shell_t *shell);
 int run_command(shell_t *shell, commands_t *command);
@@ -207,7 +206,6 @@ int add_env_var(shell_t *context, char *key, char *value);
 int parse_env_var(shell_t *context, char **env);
 void free_env_vars(shell_t *context);
 int remove_env_var(shell_t *context, char *key);
-void handle_ctrl_c(__attribute__((unused)) int signal);
 void handle_ctrl_z(__attribute__((unused)) int signal);
 void handle_sig_child(int signal);
 void history_add(shell_t *shell, char const *line);

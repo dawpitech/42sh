@@ -175,7 +175,6 @@ static
 char *get_from_stdin(shell_t *shell)
 {
     do {
-        signal(SIGINT, handle_ctrl_c);
         shell->prompt->ch = (char) getchar();
         if (shell->prompt->ch == 4)
             return NULL;
