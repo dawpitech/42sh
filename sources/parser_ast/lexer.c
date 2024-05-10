@@ -14,9 +14,10 @@
 #include "lexer_ast.h"
 
 static
-token_t *init_node(token_t *new)
+token_t *init_node(void)
 {
-    new = malloc(sizeof(token_t));
+    token_t *new = malloc(sizeof(token_t));
+
     if (!new)
         return NULL;
     new->next = NULL;
@@ -52,7 +53,6 @@ void remove_space(list_t *list)
 static
 token_t *next_token(list_t *list, token_t *node)
 {
-    node = init_node(node);
     remove_space(list);
     if (list->cursor >= list->input_len)
         return node;
@@ -81,13 +81,12 @@ list_t *lexer(char *raw_input, list_t *list)
     if (!raw_input || strlen(raw_input) <= 0)
         return NULL;
     list = init_list(list, raw_input);
-    list->head = init_node(list->head);
     while (1) {
-        tmp = next_token(list, init_node(NULL));
-        if (tmp->type == END)
+        tmp = next_token(list, init_node());
+        if (tmp->type == END) {
+            free(tmp);
             break;
-        if (tmp->type == INVALID)
-            return NULL;
+        }
         if (prev == NULL)
             list->head = tmp;
         else
