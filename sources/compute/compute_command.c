@@ -133,10 +133,11 @@ int launch_binary(commands_t *cmd)
         tcsetpgrp(STDIN_FILENO, pid);
     }
     if (cmd->fd_in != STDIN_FILENO)
-        close(cmd->fd_in);
+        if (cmd->fd_in != -1)
+            close(cmd->fd_in);
     if (cmd->fd_out != STDOUT_FILENO) {
-        close(cmd->fd_out);
-        return CMD_IS_A_PIPE;
+        if (cmd->fd_out != -1)
+            close(cmd->fd_out);
     }
     if (cmd->job_control)
         return handle_detached_process(cmd, pid);
