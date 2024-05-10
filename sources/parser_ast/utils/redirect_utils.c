@@ -135,13 +135,13 @@ pipe_t *check_redirect_symbol(pipe_t *new_pipe, token_t **token)
     if (!new_pipe || !token)
         return NULL;
     if ((*token)->type == OUT)
-        new_pipe = redirect_out(new_pipe, token);
+        return redirect_out(new_pipe, token);
     if ((*token)->type == D_OUT)
-        new_pipe = redirect_d_out(new_pipe, token);
+        return redirect_d_out(new_pipe, token);
     if ((*token)->type == IN)
-        new_pipe = redirect_in(new_pipe, token);
+        return redirect_in(new_pipe, token);
     if ((*token)->type == D_IN)
-        new_pipe = redirect_d_in(new_pipe, token);
+        return redirect_d_in(new_pipe, token);
     return new_pipe;
 }
 

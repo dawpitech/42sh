@@ -145,6 +145,7 @@ pipe_t *init_pipe(void);
 semicol_t *init_semicol(void);
 root_t *init_root(void);
 void free_parser(root_t *root);
+void free_tab(char **tab);
 and_t *init_and(void);
 or_t *init_or(void);
 
@@ -178,7 +179,11 @@ int compute_or(or_t *or_obj);
 int compute_pipe(pipe_t *pipe_obj);
 int compute_cmd(commands_t *cmd);
 
-int wait_after_launch_process(pid_t pid, commands_t *cmd);
+// GLOBBINGS
+char **handle_globbings(commands_t *cmd);
+
+int minishell(__attribute__((unused)) int argc,
+    __attribute__((unused)) char **argv, char **env);
 
 // PROMPT
 void print_prompt(shell_t *shell);
@@ -196,6 +201,7 @@ int put_job_to_foreground(jobs_t *job);
 void remove_job(jobs_t **job, bool should_print);
 
 int minishell(int argc, char **argv, char **env);
+int wait_after_launch_process(pid_t pid, commands_t *cmd);
 int present_prompt(shell_t *shell);
 root_t *parse_input(char *raw_input, shell_t *shell);
 int run_command(shell_t *shell, commands_t *command);

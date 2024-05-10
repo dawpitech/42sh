@@ -51,6 +51,7 @@ SRC	+=	./sources/compute/compute_and.c
 SRC	+=	./sources/compute/compute_or.c
 SRC	+=	./sources/compute/compute_pipe.c
 SRC	+=	./sources/compute/compute_command.c
+SRC	+=	./sources/compute/globbings/handle_globbings.c
 SRC	+=	./sources/jobs_control/jobs_manager.c
 SRC	+=	./sources/jobs_control/jobs_destroyer.c
 SRC +=	./sources/parser_ast/lexer.c

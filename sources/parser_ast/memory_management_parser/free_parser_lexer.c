@@ -10,7 +10,6 @@
 #include "minishell.h"
 #include "lexer_ast.h"
 
-static
 void free_tab(char **tab)
 {
     for (int i = 0; tab[i] != NULL; i ++)
@@ -30,6 +29,8 @@ void free_lexer_list(list_t *list)
 static
 void free_command(pipe_t *pipe)
 {
+    if (!pipe)
+        return;
     for (size_t i = 0; pipe->size > i; i ++) {
         if (pipe->tab_command[i]->sub_shell != NULL)
             free_parser(pipe->tab_command[i]->sub_shell);
@@ -43,7 +44,9 @@ void free_command(pipe_t *pipe)
 static
 void free_pipe(or_t *or_obj)
 {
-    for (size_t i = 0; or_obj->size > i; i ++) {
+    if (!or_obj)
+        return;
+    for (size_t i = 0; or_obj->size >= i; i ++) {
         free_command(or_obj->tab_pipe[i]);
         free(or_obj->tab_pipe[i]);
     }
@@ -52,7 +55,9 @@ void free_pipe(or_t *or_obj)
 static
 void free_or(and_t *and_obj)
 {
-    for (size_t i = 0; and_obj->size > i; i ++) {
+    if (!and_obj)
+        return;
+    for (size_t i = 0; and_obj->size >= i; i ++) {
         free_pipe(and_obj->tab_or[i]);
         free(and_obj->tab_or[i]);
     }
@@ -61,7 +66,9 @@ void free_or(and_t *and_obj)
 static
 void free_and(semicol_t *sm)
 {
-    for (size_t i = 0; sm->size > i; i ++) {
+    if (!sm)
+        return;
+    for (size_t i = 0; sm->size >= i; i ++) {
         free_or(sm->tab_and[i]);
         free(sm->tab_and[i]);
     }
@@ -70,7 +77,9 @@ void free_and(semicol_t *sm)
 static
 void free_semicol(root_t *root)
 {
-    for (size_t i = 0; root->size > i; i ++) {
+    if (!root)
+        return;
+    for (size_t i = 0; root->size >= i; i ++) {
         free_and(root->tab_sc[i]);
         free(root->tab_sc[i]);
     }

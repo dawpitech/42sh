@@ -20,7 +20,6 @@ int realloc_tab_and(semicol_t *sm)
     } else {
         sm->tab_and = realloc(sm->tab_and, sizeof(and_t *) * (sm->size + 2));
     }
-    sm->tab_and[sm->size] = malloc(sizeof(and_t));
     if (!sm)
         return RET_ERROR;
     sm->tab_and[sm->size + 1] = NULL;
