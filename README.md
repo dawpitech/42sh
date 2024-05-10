@@ -2,6 +2,7 @@
 
 An interactive Linux shell written in C
 
+![Screenshot of the shell](./bonus/screenshot.png)
 ## Summary
 
 This project is an Epitech Project aimed at rewriting a linux shell in C
@@ -17,10 +18,12 @@ autocompletion, history, etc.
 - [x] Pipes
 - [x] Redirection
 - [x] History
+- [x] History navigation
 - [x] Colors
 - [x] Builtins
 - [x] Prompt editing
 - [x] Job controls
+- [x] Globbings
 - [ ] Autocompletion
 - [ ] Aliases
 
@@ -41,8 +44,12 @@ It also handles the following syntax:
 * `>`, `>>`, `<` for redirection
 * `|` for pipes
 * `;` to separate commands
+* `||` as the OR operator
+* `&&`as the AND operator
+* `*` for the globbings
+* `!` to load a command from the history
 
-You can start the shell with a command already typed
+You can start the shell with a command already typed (`-c` as second parameter, third parameter should be the command to run).
 
 ```bash
 ./42sh -c "echo hello"
