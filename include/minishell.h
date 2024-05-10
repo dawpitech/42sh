@@ -182,8 +182,8 @@ int wait_after_launch_process(pid_t pid, commands_t *cmd);
 
 // PROMPT
 void print_prompt(shell_t *shell);
-void history_up(shell_t *shell);
-void history_down(shell_t *shell);
+void history_up(shell_t *shell, char **old_input);
+void history_down(shell_t *shell, char **old_input);
 void cursor_left(shell_t *shell);
 void cursor_right(shell_t *shell);
 

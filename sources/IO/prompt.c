@@ -79,6 +79,7 @@ void print_prompt(shell_t *shell)
 
     if (!shell->isatty)
         return;
+    printf("\033[2K\r");
     printf("%s%s➜ %s%s%s ", AC_BOLD, color, AC_C_BRIGHT_BLUE, current_dir,
             AC_RESET);
     if (is_git_repo()) {
@@ -114,8 +115,6 @@ void remove_char(shell_t *shell)
         memmove(&shell->prompt->input[shell->prompt->cursor_pos - 1],
                 &shell->prompt->input[shell->prompt->cursor_pos],
                 strlen(shell->prompt->input) - shell->prompt->cursor_pos + 1);
-        printf("\033[2K");
-        printf("\r");
         print_prompt(shell);
         printf("%s", shell->prompt->input);
         for (int i = 0; i <
@@ -139,8 +138,6 @@ void add_char(shell_t *shell)
     shell->prompt->input[shell->prompt->len + 1] = '\0';
     shell->prompt->len += 1;
     shell->prompt->cursor_pos += 1;
-    printf("\033[2K");
-    printf("\r");
     print_prompt(shell);
     printf("%s", shell->prompt->input);
     for (int i = 0;
@@ -151,6 +148,8 @@ void add_char(shell_t *shell)
 static
 void handle_arrow_keys(shell_t *shell)
 {
+    char *old_input = NULL;
+
     (void)!getchar();
     shell->prompt->ch = (char)getchar();
     switch (shell->prompt->ch) {
@@ -161,10 +160,10 @@ void handle_arrow_keys(shell_t *shell)
             cursor_right(shell);
             break;
         case 'A':
-            history_up(shell);
+            history_up(shell, &old_input);
             break;
         case 'B':
-            history_down(shell);
+            history_down(shell, &old_input);
             break;
         default:
             break;
