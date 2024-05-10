@@ -25,6 +25,7 @@ static const builtin_t builtins_list[] = {
     {.cmd = "!", .fptr = execute_search_history},
     {.cmd = "jobs", .fptr = execute_jobs},
     {.cmd = "fg", .fptr = execute_fg},
+    {.cmd = "which", .fptr = execute_which},
     {.cmd = NULL, .fptr = NULL},
 };
 #endif //MINISHELL_BUILTINS_H

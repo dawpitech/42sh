@@ -34,6 +34,7 @@ It handles the following builtins:
 * setenv
 * unsetenv
 * exit
+* which
 
 It also handles the following syntax:
 

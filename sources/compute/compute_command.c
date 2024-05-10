@@ -147,7 +147,7 @@ static
 int resolve_path(commands_t *cmd)
 {
     char *full_path;
-    char *bin_location = search_bin(cmd->shell, cmd);
+    char *bin_location = search_bin(cmd->shell, cmd->argv[0]);
 
     if (bin_location == NULL)
         return NO_CMD_FOUND;
