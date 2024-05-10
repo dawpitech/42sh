@@ -6,7 +6,21 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "minishell.h"
+
+static
+struct termios init_termios(void)
+{
+    struct termios old_config;
+    struct termios new_config;
+
+    tcgetattr(STDIN_FILENO, &old_config);
+    new_config = old_config;
+    new_config.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
+    return old_config;
+}
 
 void history_up(shell_t *shell, char **old_input)
 {
@@ -64,4 +78,16 @@ void cursor_right(shell_t *shell)
         return;
     printf("\033[C");
     shell->prompt->cursor_pos += 1;
+}
+
+void init_prompt(shell_t *shell)
+{
+    shell->cmds_valid = true;
+    shell->prompt = malloc(sizeof(prompt_t));
+    shell->prompt->old_config = init_termios();
+    shell->prompt->input = calloc(1, sizeof(char));
+    shell->prompt->cursor_pos = 0;
+    shell->prompt->len = 0;
+    shell->prompt->ch = 0;
+    shell->prompt->history_pos = (int) shell->history_size;
 }

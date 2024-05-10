@@ -45,6 +45,7 @@ SRC	+=	./sources/IO/prompt.c
 SRC	+=	./sources/IO/history.c
 SRC	+=	./sources/IO/path_explorer.c
 SRC	+=	./sources/IO/prompt_navigation.c
+SRC	+=	./sources/IO/prompt_no_tty.c
 SRC	+=	./sources/utils/my_put_stderr.c
 SRC	+=	./sources/compute/compute_root.c
 SRC	+=	./sources/compute/compute_semicolon.c

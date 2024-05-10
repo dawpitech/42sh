@@ -40,7 +40,6 @@
 
 typedef struct root_s root_t;
 typedef struct shell_s shell_t;
-extern shell_t *signal_shell;
 
 typedef struct commands_s {
     char *exec_name;
@@ -191,6 +190,8 @@ void history_up(shell_t *shell, char **old_input);
 void history_down(shell_t *shell, char **old_input);
 void cursor_left(shell_t *shell);
 void cursor_right(shell_t *shell);
+char *get_from_stdin_no_tty(void);
+void init_prompt(shell_t *shell);
 
 // JOBS CONTROL
 jobs_t *new_job(shell_t *shell);
