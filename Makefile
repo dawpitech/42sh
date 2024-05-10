@@ -99,7 +99,6 @@ all:	$(NAME)
 $(NAME):	$(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
 
-.NOTPARALLEL: $(T_NAME)
 $(T_NAME):	$(T_OBJ)
 	$(CC) $(T_OBJ) $(T_CFLAGS) -o $(T_NAME)
 
