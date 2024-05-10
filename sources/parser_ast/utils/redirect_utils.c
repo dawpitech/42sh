@@ -29,6 +29,10 @@ pipe_t *redirect_out(pipe_t *new_pipe, token_t **token)
     filefd = open((*token)->text, O_CREAT | O_TRUNC | O_WRONLY, 0666);
     new_pipe->tab_command[new_pipe->size - 1]->fd_out = filefd;
     (*token) = (*token)->next;
+    if ((*token) && (*token)->type == PIPE) {
+        dprintf(2, "Ambiguous output redirect.\n");
+        return NULL;
+    }
     return new_pipe;
 }
 

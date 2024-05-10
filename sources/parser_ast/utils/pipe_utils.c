@@ -32,7 +32,7 @@ int realloc_tab_cmd(pipe_t *p)
         p->tab_command = malloc(sizeof(commands_t *) * 2);
     else
         p->tab_command = realloc(p->tab_command,
-            sizeof(commands_t) * (p->size + 2));
+            sizeof(commands_t) * (p->size));
     p->tab_command[p->size] = malloc(sizeof(commands_t));
     if (!p->tab_command || !p->tab_command[p->size])
         return RET_ERROR;
@@ -53,24 +53,21 @@ void fill_arguments(token_t **token, commands_t *c)
 }
 
 static
-int add_command(pipe_t *new_pipe, token_t **token, int idx, shell_t *shell)
+int add_command(pipe_t *p, token_t **token, int idx, shell_t *shell)
 {
-    commands_t *c = malloc(sizeof(commands_t));
-
-    c->exec_name = handle_operator(token);
-    c->argv = malloc(sizeof(char *) * 2);
-    c->argv[0] = strdup(c->exec_name);
-    c->argv[1] = NULL;
-    c->argc = 1;
-    c->fd_in = STDIN_FILENO;
-    c->fd_out = STDOUT_FILENO;
-    c->shell = shell;
-    c->sub_shell = NULL;
-    c->job_control = false;
+    p->tab_command[idx]->exec_name = handle_operator(token);
+    p->tab_command[idx]->argv = malloc(sizeof(char *) * 2);
+    p->tab_command[idx]->argv[0] = strdup(p->tab_command[idx]->exec_name);
+    p->tab_command[idx]->argv[1] = NULL;
+    p->tab_command[idx]->argc = 1;
+    p->tab_command[idx]->fd_in = STDIN_FILENO;
+    p->tab_command[idx]->fd_out = STDOUT_FILENO;
+    p->tab_command[idx]->shell = shell;
+    p->tab_command[idx]->sub_shell = NULL;
+    p->tab_command[idx]->job_control = false;
     (*token) = (*token)->next;
-    fill_arguments(token, c);
-    new_pipe->tab_command[idx] = c;
-    new_pipe->size += 1;
+    fill_arguments(token, p->tab_command[idx]);
+    p->size += 1;
     return RET_VALID;
 }
 

@@ -19,8 +19,14 @@ void free_tab(char **tab)
 
 void free_lexer_list(list_t *list)
 {
-    for (token_t *tmp = list->head; tmp != NULL; tmp = tmp->next) {
+    token_t *prev = NULL;
+    token_t *tmp = list->head;
+
+    while (tmp != NULL) {
         free(tmp->text);
+        prev = tmp;
+        tmp = tmp->next;
+        free(prev);
     }
     free(list->input);
     free(list);
@@ -38,7 +44,11 @@ void free_command(pipe_t *pipe)
             free_tab(pipe->tab_command[i]->argv);
             free(pipe->tab_command[i]->exec_name);
         }
+        free(pipe->tab_command[i]);
     }
+    free(pipe->tab_command[pipe->size]);
+    free(pipe->tab_command);
+    pipe->tab_command = NULL;
 }
 
 static
@@ -50,6 +60,9 @@ void free_pipe(or_t *or_obj)
         free_command(or_obj->tab_pipe[i]);
         free(or_obj->tab_pipe[i]);
     }
+    free(or_obj->tab_pipe[or_obj->size]);
+    free(or_obj->tab_pipe);
+    or_obj->tab_pipe = NULL;
 }
 
 static
@@ -61,6 +74,9 @@ void free_or(and_t *and_obj)
         free_pipe(and_obj->tab_or[i]);
         free(and_obj->tab_or[i]);
     }
+    free(and_obj->tab_or[and_obj->size]);
+    free(and_obj->tab_or);
+    and_obj->tab_or = NULL;
 }
 
 static
@@ -72,6 +88,9 @@ void free_and(semicol_t *sm)
         free_or(sm->tab_and[i]);
         free(sm->tab_and[i]);
     }
+    free(sm->tab_and[sm->size]);
+    free(sm->tab_and);
+    sm->tab_and = NULL;
 }
 
 static
@@ -83,6 +102,9 @@ void free_semicol(root_t *root)
         free_and(root->tab_sc[i]);
         free(root->tab_sc[i]);
     }
+    free(root->tab_sc[root->size]);
+    free(root->tab_sc);
+    root->tab_sc = NULL;
 }
 
 void free_parser(root_t *root)
@@ -90,4 +112,5 @@ void free_parser(root_t *root)
     if (root == NULL)
         return;
     free_semicol(root);
+    free(root);
 }

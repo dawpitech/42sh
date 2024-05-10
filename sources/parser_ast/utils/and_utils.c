@@ -19,8 +19,7 @@ int realloc_tab_or(and_t *and_obj)
     else
         and_obj->tab_or = realloc(and_obj->tab_or, sizeof(or_t *) *
             (and_obj->size + 2));
-    and_obj->tab_or[and_obj->size] = malloc(sizeof(or_t));
-    if (!and_obj->tab_or || !and_obj->tab_or[and_obj->size])
+    if (!and_obj->tab_or)
         return RET_ERROR;
     and_obj->tab_or[and_obj->size + 1] = NULL;
     return RET_VALID;
