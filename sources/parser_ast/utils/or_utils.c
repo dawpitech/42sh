@@ -18,9 +18,8 @@ int realloc_tab_pipe(or_t *or_obj)
         or_obj->tab_pipe = malloc(sizeof(pipe_t *) * 2);
     else
         or_obj->tab_pipe = realloc(or_obj->tab_pipe,
-            sizeof(pipe_t *) * (or_obj->size + 2));
-    or_obj->tab_pipe[or_obj->size] = malloc(sizeof(pipe_t));
-    if (!or_obj || !or_obj->tab_pipe[or_obj->size])
+            sizeof(pipe_t *) * (or_obj->size + 1));
+    if (!or_obj)
         return RET_ERROR;
     or_obj->tab_pipe[or_obj->size + 1] = NULL;
     return RET_VALID;
