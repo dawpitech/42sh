@@ -35,6 +35,7 @@ FP_EXECP_NAME	=	floating.bin
 SRC = ./sources/minishell.c
 SRC	+=	./sources/builtins/run_builtins.c
 SRC	+=	./sources/builtins/builtins_cmd.c
+SRC	+=	./sources/builtins/builtins_extra_cmd.c
 SRC	+=	./sources/builtins/builtins_history.c
 SRC	+=	./sources/builtins/builtins_search_history.c
 SRC	+=	./sources/builtins/builtins_jobs_control.c

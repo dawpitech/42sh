@@ -31,14 +31,14 @@ int find_bin_in_dir(char *bin_searched, char *dir_path)
     return RET_ERROR;
 }
 
-char *search_bin(shell_t *shell, commands_t *cmd)
+char *search_bin(shell_t *shell, char *cmd_name)
 {
     char *path = strdup(get_env_var(shell, "PATH")->value);
     char *result = strtok(path, ":");
     char *rt;
 
     while (result != NULL) {
-        if (find_bin_in_dir(cmd->argv[0], result) == RET_VALID) {
+        if (find_bin_in_dir(cmd_name, result) == RET_VALID) {
             rt = strdup(result);
             free(path);
             return rt;
