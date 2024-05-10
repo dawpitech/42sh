@@ -15,8 +15,6 @@
 #include "minishell.h"
 #include "ansi_chars.h"
 
-shell_t *signal_shell;
-
 static
 bool is_git_repo(void)
 {
@@ -91,19 +89,6 @@ void print_prompt(shell_t *shell)
     printf("❯ ");
     free(current_dir);
     fflush(stdout);
-}
-
-static
-struct termios init_termios(void)
-{
-    struct termios old_config;
-    struct termios new_config;
-
-    tcgetattr(STDIN_FILENO, &old_config);
-    new_config = old_config;
-    new_config.c_lflag &= ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &new_config);
-    return old_config;
 }
 
 static
@@ -196,19 +181,14 @@ char *get_from_stdin(shell_t *shell)
 
 int present_prompt(shell_t *shell)
 {
-    signal_shell = shell;
-    shell->cmds_valid = true;
-    shell->prompt = malloc(sizeof(prompt_t));
-    shell->prompt->old_config = init_termios();
-    shell->prompt->input = calloc(1, sizeof(char));
-    shell->prompt->cursor_pos = 0;
-    shell->prompt->len = 0;
-    shell->prompt->ch = 0;
-    shell->prompt->history_pos = (int) shell->history_size;
+    init_prompt(shell);
     if (shell->prompt == NULL)
         return RET_ERROR;
     print_prompt(shell);
-    shell->prompt->raw_input = get_from_stdin(shell);
+    if (shell->isatty)
+        shell->prompt->raw_input = get_from_stdin(shell);
+    else
+        shell->prompt->raw_input = get_from_stdin_no_tty();
     if (shell->prompt->raw_input != NULL)
         return RET_VALID;
     else
