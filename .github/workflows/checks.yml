@@ -27,28 +27,21 @@ jobs:
 
   coding_style:
     runs-on: ubuntu-latest
-    container: epitechcontent/epitest-docker:latest
+    container: ghcr.io/epitech/coding-style-checker:latest
     needs: [ unit_tests ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile
-        run: make
-        timeout-minutes: 2
-
-      - name: Verify make clean
+      - name: Check for banned functions
         run: |
-          make clean
-          export EXECUTABLES=${{ env.EXECUTABLES }}
-          for executable in ${EXECUTABLES//,/ };
-          do
-            if ! [ -x "$executable" ]; then
-              echo "Binary $executable is not executable"
-              exit 1
-            fi
-          done
+          check.sh $(pwd) $(pwd)
+          if ! [ -s "coding-style-reports.log" ]; then
+            exit 0
+          fi
+          awk -F':' '{sub(/^ /, "", $3); print "::error file="$1",line="$2",title="$3" coding style error::"$4}' coding-style-reports.log
+          exit 1
 
   mirror:
     if: github.event_name != 'pull_request'

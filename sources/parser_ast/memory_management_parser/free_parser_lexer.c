@@ -87,5 +87,7 @@ void free_semicol(root_t *root)
 
 void free_parser(root_t *root)
 {
+    if (root == NULL)
+        return;
     free_semicol(root);
 }
