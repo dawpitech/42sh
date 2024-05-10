@@ -62,4 +62,4 @@ jobs:
         run: |
           git fetch --unshallow origin
           git remote add epitech "${{ secrets.MIRROR_REPO }}"
-          git push epitech --force
+          git push --force epitech main:fix-ci-2
