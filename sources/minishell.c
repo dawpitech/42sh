@@ -72,7 +72,7 @@ void input_loop(shell_t *shell)
     update_childs(shell);
     if (shell->root == NULL) {
         shell->cmds_valid = false;
-        shell->last_exit_code = 1;
+        shell->last_exit_code = 0;
     }
     if (shell->cmds_valid)
         shell->last_exit_code = compute_root(shell->root);
