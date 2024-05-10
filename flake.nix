@@ -2,7 +2,7 @@
   description = "42sh";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
   };
 
@@ -51,7 +51,7 @@
 
         formatter = pkgs.nixpkgs-fmt;
         packages = {
-          default = mkCApp "mysh";
+          default = mkCApp "42sh";
           unit_tests = mkCApp "unit_tests";
         };
       });
